@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2019, Cray Inc. All Rights Reserved.
+# Copyright 2019,2021 Hewlett Packard Enterprise Development LP
 set -x
 
 RECIPE_ROOT_PARENT=${1:-/mnt/recipe}
@@ -32,7 +32,7 @@ fi
 
 # Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
 # causes kiwi to install the cray-ca-cert rpm into the image root.
-kiwi-ng $DEBUG_FLAGS --logfile=$PARAMETER_FILE_KIWI_LOGFILE --type tbz system build --description $RECIPE_ROOT_PARENT --target $IMAGE_ROOT_PARENT --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.0-1.x86_64.rpm
+kiwi-ng $DEBUG_FLAGS --logfile=$PARAMETER_FILE_KIWI_LOGFILE --type tbz system build --description $RECIPE_ROOT_PARENT --target $IMAGE_ROOT_PARENT --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.x86_64.rpm
 rc=$?
 
 if [ "$rc" -ne "0" ]; then
