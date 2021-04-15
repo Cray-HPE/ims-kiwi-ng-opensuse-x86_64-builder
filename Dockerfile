@@ -1,6 +1,6 @@
 ## Cray Image Management Service image build environment Dockerfile
-## Copyright 2018, Cray Inc. All rights reserved.
-FROM dtr.dev.cray.com/baseos/opensuse:15
+# Copyright 2018, 2021, Hewlett Packard Enterprise Development LP
+FROM arti.dev.cray.com/baseos-docker-master-local/opensuse-leap:15.2
 
 COPY requirements.txt constraints.txt /
 RUN zypper in -y python3-pip python3-kiwi yum xz jing && \
