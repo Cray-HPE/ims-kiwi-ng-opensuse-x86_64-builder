@@ -23,7 +23,7 @@
 FROM arti.dev.cray.com/baseos-docker-master-local/opensuse-leap:15.2
 
 COPY requirements.txt constraints.txt /
-RUN zypper in -y python3-pip python3-kiwi yum xz jing && \
+RUN zypper in -y python3-pip python3-kiwi xz jing && \
     zypper clean && \
     pip3 install --upgrade pip \
         --trusted-host dst.us.cray.com \
