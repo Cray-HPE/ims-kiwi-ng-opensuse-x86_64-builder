@@ -1,0 +1,42 @@
+@Library('csm-shared-library') _
+
+pipeline {
+    agent {
+        label "metal-gcp-builder"
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: "10"))
+        timestamps()
+    }
+
+    environment {
+        NAME = "ims-kiwi-ng-opensuse-x86_64-builder"
+        DESCRIPTION = "Cray image management service openSUSE-based (x86-64) kiwi-ng image build environment"
+        IS_STABLE = getBuildIsStable()
+        VERSION = getDockerBuildVersion(isStable: env.IS_STABLE)
+        DOCKER_ARGS = getDockerBuildArgs(name: env.NAME, description: env.DESCRIPTION)
+    }
+
+    stages {
+        stage("Lint") {
+            steps {
+                sh "make lint"
+            }
+        }
+
+        stage("Build") {
+            steps {
+                sh "make image"
+            }
+        }
+
+        stage("Publish") {
+            steps {
+                script {
+                    publishCsmDockerImage(image: env.NAME, tag: env.VERSION, isStable: env.IS_STABLE)
+                }
+            }
+        }
+    }
+}
