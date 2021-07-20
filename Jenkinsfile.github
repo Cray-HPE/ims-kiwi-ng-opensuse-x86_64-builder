@@ -11,7 +11,7 @@ pipeline {
     }
 
     environment {
-        NAME = "ims-kiwi-ng-opensuse-x86_64-builder"
+        NAME = "cray-ims-kiwi-ng-opensuse-x86_64-builder"
         DESCRIPTION = "Cray image management service openSUSE-based (x86-64) kiwi-ng image build environment"
         IS_STABLE = getBuildIsStable()
         VERSION = getDockerBuildVersion(isStable: env.IS_STABLE)
