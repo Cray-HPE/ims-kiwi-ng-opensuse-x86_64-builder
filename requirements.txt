@@ -1,6 +1,8 @@
 # Only use Cray-procured packages
 --trusted-host dst.us.cray.com
+--trusted-host artifactory.algol60.net
 --index-url http://dst.us.cray.com/piprepo/simple
+--extra-index-url http://artifactory.algol60.net/artifactory/csm-python-modules/simple
 -c constraints.txt
 
 ims-python-helper
