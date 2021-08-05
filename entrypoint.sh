@@ -52,7 +52,15 @@ fi
 
 # Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
 # causes kiwi to install the cray-ca-cert rpm into the image root.
-kiwi-ng $DEBUG_FLAGS --logfile=$PARAMETER_FILE_KIWI_LOGFILE --type tbz system build --description $RECIPE_ROOT_PARENT --target $IMAGE_ROOT_PARENT --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.x86_64.rpm
+kiwi-ng \
+    $DEBUG_FLAGS \
+    --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
+    --type tbz system build \
+    --description $RECIPE_ROOT_PARENT \
+    --target $IMAGE_ROOT_PARENT \
+    --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.x86_64.rpm \
+    --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
+    --signing-key /signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc
 rc=$?
 
 if [ "$rc" -ne "0" ]; then

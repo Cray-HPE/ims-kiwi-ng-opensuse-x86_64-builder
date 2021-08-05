@@ -35,7 +35,9 @@ RUN zypper in -y python3-pip python3-kiwi xz jing && \
 VOLUME /mnt/image
 VOLUME /mnt/recipe
 
-RUN mkdir -p /scripts
+RUN mkdir -p /scripts /signing-keys
+COPY signing-keys/HPE-SHASTA-RPM-PROD.asc /signing-keys
+COPY signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc /signing-keys
 COPY entrypoint.sh /scripts/entrypoint.sh
 ENTRYPOINT ["/scripts/entrypoint.sh"]
 
