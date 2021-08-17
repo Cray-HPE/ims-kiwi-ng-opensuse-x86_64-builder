@@ -28,9 +28,7 @@ RUN zypper refresh
 # Apply security patches
 RUN zypper patch -y --with-update --with-optional
 RUN zypper clean
-RUN pip3 install --upgrade pip \
-        --trusted-host dst.us.cray.com \
-        --index-url http://dst.us.cray.com/piprepo/simple
+RUN pip3 install --upgrade pip -r requirements.txt
 RUN pip3 install \
        --no-cache-dir \
        -r requirements.txt
