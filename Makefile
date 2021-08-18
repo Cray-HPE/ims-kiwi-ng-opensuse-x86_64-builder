@@ -20,15 +20,19 @@
 #
 # (MIT License)
 
-NAME ?= ims-kiwi-ng-opensuse-x86_64-builder
-export VERSION ?= $(shell cat .version)-local
-export DOCKER_IMAGE ?= ${NAME}:${VERSION}
+# If you wish to perform a local build, you will need to clone or copy the contents of the
+# cms-meta-tools repo to ./cms_meta_tools
 
-all: lint image
+NAME ?= ims-kiwi-ng-opensuse-x86_64-builder
+DOCKER_VERSION ?= $(shell head -1 .docker_version)
+
+all : runbuildprep lint image 
+
+runbuildprep:
+		./cms_meta_tools/scripts/runBuildPrep.sh
 
 lint:
-		./runLint.sh
+		./cms_meta_tools/scripts/runLint.sh
 
 image:
-		docker build --pull ${DOCKER_ARGS} --tag '${NAME}:${VERSION}' .
-
+		docker build --pull ${DOCKER_ARGS} --tag '${NAME}:${DOCKER_VERSION}' .
