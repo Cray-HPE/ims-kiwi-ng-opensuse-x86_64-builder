@@ -20,7 +20,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 # (MIT License)
-FROM arti.dev.cray.com/baseos-docker-master-local/opensuse-leap:15.2
+FROM arti.dev.cray.com/baseos-docker-master-local/opensuse-leap:15.2 as base
 
 COPY requirements.txt constraints.txt /
 RUN zypper in -y python3-pip python3-kiwi xz jing && \
