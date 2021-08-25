@@ -1,4 +1,4 @@
-## Cray Image Management Service image build environment Dockerfile
+# Cray Image Management Service image build environment Dockerfile
 # Copyright 2018, 2021 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
