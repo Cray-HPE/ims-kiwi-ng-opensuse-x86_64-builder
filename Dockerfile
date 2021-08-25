@@ -1,4 +1,4 @@
-## Cray Image Management Service image build environment Dockerfile
+# Cray Image Management Service image build environment Dockerfile
 # Copyright 2018, 2021 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,8 +26,8 @@ COPY requirements.txt constraints.txt /
 RUN zypper in -y python3-pip python3-kiwi xz jing && \
     zypper clean && \
     pip3 install --upgrade pip \
-        --trusted-host dst.us.cray.com \
-        --index-url http://dst.us.cray.com/piprepo/simple && \
+        --trusted-host arti.dev.cray.com \
+        --index-url https://arti.dev.cray.com:443/artifactory/api/pypi/pypi-remote/simple && \
     pip3 install \
        --no-cache-dir \
        -r requirements.txt
