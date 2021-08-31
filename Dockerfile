@@ -28,7 +28,7 @@ RUN zypper refresh
 # Apply security patches
 RUN zypper patch -y --with-update --with-optional
 RUN zypper clean
-RUN pip3 install --upgrade pip -r requirements.txt
+RUN pip3 install --upgrade pip
 RUN pip3 install \
        --no-cache-dir \
        -r requirements.txt
@@ -41,5 +41,3 @@ COPY signing-keys/HPE-SHASTA-RPM-PROD.asc /signing-keys
 COPY signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc /signing-keys
 COPY entrypoint.sh /scripts/entrypoint.sh
 ENTRYPOINT ["/scripts/entrypoint.sh"]
-
-
