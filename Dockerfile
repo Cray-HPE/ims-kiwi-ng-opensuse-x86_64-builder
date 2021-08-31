@@ -28,7 +28,7 @@ RUN zypper refresh
 # Apply security patches
 RUN zypper patch -y --with-update --with-optional
 RUN zypper clean
-RUN pip3 install --upgrade pip -r requirements.txt
+RUN pip3 install --upgrade pip
 RUN pip3 install \
        --no-cache-dir \
        -r requirements.txt
@@ -39,5 +39,3 @@ VOLUME /mnt/recipe
 RUN mkdir -p /scripts
 COPY entrypoint.sh /scripts/entrypoint.sh
 ENTRYPOINT ["/scripts/entrypoint.sh"]
-
-
