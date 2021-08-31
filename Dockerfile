@@ -23,12 +23,14 @@
 FROM arti.dev.cray.com/baseos-docker-master-local/opensuse-leap:15.2 as base
 
 COPY requirements.txt constraints.txt /
-RUN zypper in -y python3-pip python3-kiwi xz jing && \
-    zypper clean && \
-    pip3 install --upgrade pip \
+RUN zypper in -y python3-pip python3-kiwi xz jing
+RUN zypper refresh
+RUN zypper patch -y --with-update --with-optional
+RUN zypper clean
+RUN pip3 install --upgrade pip \
         --trusted-host arti.dev.cray.com \
-        --index-url https://arti.dev.cray.com:443/artifactory/api/pypi/pypi-remote/simple && \
-    pip3 install \
+        --index-url https://arti.dev.cray.com:443/artifactory/api/pypi/pypi-remote/simple
+RUN pip3 install \
        --no-cache-dir \
        -r requirements.txt
 
@@ -38,5 +40,3 @@ VOLUME /mnt/recipe
 RUN mkdir -p /scripts
 COPY entrypoint.sh /scripts/entrypoint.sh
 ENTRYPOINT ["/scripts/entrypoint.sh"]
-
-
