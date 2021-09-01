@@ -4,7 +4,7 @@ certifi==2019.11.28
 chardet==3.0.4
 docutils==0.14
 idna==2.8
-ims-python-helper>=2.6.3
+ims-python-helper==2.6.18
 jmespath==0.9.4
 oauthlib==2.1.0
 python-dateutil==2.8.1
