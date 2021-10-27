@@ -18,6 +18,17 @@ In the case of a failure, follow on containers have the option of enabling a SSH
 shell where the administrator can access the failed image root in order to determine
 the nature of the failure and how to resolve. 
 
+# Container Runs as Root
+
+Kiwi-ng must be run as root in order to build and chroot into the image root being 
+built. There are Kiwi plugins that allow Kiwi-ng to not require root access, however 
+these plugins also require virtualization, which is not available within a docker
+container. 
+
+There is future work that will hopefully mitigate any concern regarding this container 
+running as root. However, until this work is completed, the container will need to run
+as root.
+
 ## Getting Started
 ### Prerequisites
 To build and use the ims-kiwi-ng-opensuse-x86_64-builder Docker image, you will
