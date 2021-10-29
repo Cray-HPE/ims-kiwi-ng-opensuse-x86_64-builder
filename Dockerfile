@@ -24,9 +24,11 @@ FROM arti.dev.cray.com/baseos-docker-master-local/opensuse-leap:15.2 as base
 
 COPY requirements.txt constraints.txt /
 RUN zypper in -y python3-pip python3-kiwi xz jing
-RUN zypper refresh
-RUN zypper patch -y --with-update --with-optional
-RUN zypper clean
+
+# Apply security patches
+COPY zypper-refresh-patch-clean.sh /
+RUN /zypper-refresh-patch-clean.sh && rm /zypper-refresh-patch-clean.sh
+
 RUN pip3 install --upgrade pip \
         --trusted-host arti.dev.cray.com \
         --index-url https://arti.dev.cray.com:443/artifactory/api/pypi/pypi-remote/simple
