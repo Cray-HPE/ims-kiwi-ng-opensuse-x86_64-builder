@@ -24,10 +24,11 @@ FROM arti.dev.cray.com/baseos-docker-master-local/opensuse-leap:15.2 as base
 
 COPY requirements.txt constraints.txt /
 RUN zypper in -y python3-pip python3-kiwi xz jing
-RUN zypper refresh
+
 # Apply security patches
-RUN zypper patch -y --with-update --with-optional
-RUN zypper clean
+COPY zypper-refresh-patch-clean.sh /
+RUN /zypper-refresh-patch-clean.sh && rm /zypper-refresh-patch-clean.sh
+
 RUN pip3 install --upgrade pip
 RUN pip3 install \
        --no-cache-dir \
