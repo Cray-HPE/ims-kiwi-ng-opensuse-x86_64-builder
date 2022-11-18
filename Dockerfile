@@ -32,9 +32,8 @@ COPY zypper-refresh-patch-clean.sh /
 RUN /zypper-refresh-patch-clean.sh && rm /zypper-refresh-patch-clean.sh
 
 RUN pip3 install --upgrade pip
-RUN pip3 install \
-       --no-cache-dir \
-       -r requirements.txt
+RUN --mount=type=secret,id=netrc,target=/root/.netrc \
+    pip3 install --no-cache-dir -r requirements.txt
 
 VOLUME /mnt/image
 VOLUME /mnt/recipe

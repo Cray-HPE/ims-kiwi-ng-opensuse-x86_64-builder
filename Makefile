@@ -27,6 +27,10 @@
 NAME ?= ims-kiwi-ng-opensuse-x86_64-builder
 DOCKER_VERSION ?= $(shell head -1 .docker_version)
 
+ifneq ($(wildcard ${HOME}/.netrc),)
+        DOCKER_ARGS ?= --secret id=netrc,src=${HOME}/.netrc
+endif
+
 all : runbuildprep lint image 
 
 runbuildprep:
