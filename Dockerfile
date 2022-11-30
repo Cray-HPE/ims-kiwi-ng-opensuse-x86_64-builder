@@ -1,5 +1,5 @@
 # Cray Image Management Service image build environment Dockerfile
-# Copyright 2018, 2021 Hewlett Packard Enterprise Development LP
+# Copyright 2018, 2021-2022 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -30,9 +30,8 @@ COPY zypper-refresh-patch-clean.sh /
 RUN /zypper-refresh-patch-clean.sh && rm /zypper-refresh-patch-clean.sh
 
 RUN pip3 install --upgrade pip
-RUN pip3 install \
-       --no-cache-dir \
-       -r requirements.txt
+RUN --mount=type=secret,id=netrc,target=/root/.netrc \
+    pip3 install --no-cache-dir -r requirements.txt
 
 VOLUME /mnt/image
 VOLUME /mnt/recipe
