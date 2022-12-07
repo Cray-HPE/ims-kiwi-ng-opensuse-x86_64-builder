@@ -1,4 +1,4 @@
-# Copyright 2019-2021 Hewlett Packard Enterprise Development LP
+# Copyright 2019-2022 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -25,6 +25,10 @@
 
 NAME ?= ims-kiwi-ng-opensuse-x86_64-builder
 DOCKER_VERSION ?= $(shell head -1 .docker_version)
+
+ifneq ($(wildcard ${HOME}/.netrc),)
+        DOCKER_ARGS ?= --secret id=netrc,src=${HOME}/.netrc
+endif
 
 all : runbuildprep lint image 
 
