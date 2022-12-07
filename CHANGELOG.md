@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2022-012-02
+### Added
+- Authenticate to CSM's artifactory
+
 ## [1.4.0] - 2022-08-02
 ### Changed
 - CASMCMS-7970 - update dev.cray.com addresses.
