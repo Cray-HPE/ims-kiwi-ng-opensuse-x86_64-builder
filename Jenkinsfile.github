@@ -2,7 +2,7 @@
  *
  *  MIT License
  *
- *  (C) Copyright 2021-2022 Hewlett Packard Enterprise Development LP
+ *  (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a
  *  copy of this software and associated documentation files (the "Software"),
@@ -40,7 +40,7 @@ pipeline {
         NAME = "cray-ims-kiwi-ng-opensuse-x86_64-builder"
         DESCRIPTION = "Cray image management service openSUSE-based (x86-64) kiwi-ng image build environment"
         IS_STABLE = getBuildIsStable()
-	DOCKER_BUILDKIT = "1"
+        DOCKER_BUILDKIT = "1"
     }
 
     stages {
@@ -90,7 +90,7 @@ pipeline {
             }
 
             steps {
-                publishCsmDockerImage(image: env.NAME, tag: env.DOCKER_VERSION, isStable: env.IS_STABLE)
+                publishCsmDockerImage(image: env.NAME, tag: env.DOCKER_VERSION, isStable: env.IS_STABLE, multiArch: true)
             }
         }
     }

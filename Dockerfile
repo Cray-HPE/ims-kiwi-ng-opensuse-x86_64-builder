@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2018, 2021-2022 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2018, 2021-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -22,7 +22,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 # Cray Image Management Service image build environment Dockerfile
-FROM arti.hpc.amslabs.hpecorp.net/baseos-docker-master-local/opensuse-leap:15.2 as base
+FROM artifactory.algol60.net/csm-docker/stable/docker.io/opensuse/leap:15.4 as base
 
 COPY requirements.txt constraints.txt /
 RUN zypper in -y python3-pip python3-kiwi xz jing
