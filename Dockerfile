@@ -22,7 +22,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 # Cray Image Management Service image build environment Dockerfile
-FROM artifactory.algol60.net/csm-docker/stable/docker.io/opensuse/leap:15.4 as base
+FROM arti.hpc.amslabs.hpecorp.net/baseos-docker-master-local/opensuse/leap:15.4 as base
 
 COPY requirements.txt constraints.txt /
 
