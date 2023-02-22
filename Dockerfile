@@ -26,7 +26,7 @@ FROM arti.hpc.amslabs.hpecorp.net/baseos-docker-master-local/opensuse-leap:15.2 
 
 COPY requirements.txt constraints.txt /
 
-RUN wget https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static \
+RUN curl -o https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static qemu-aarch64-static \
 && mv ./qemu-aarch64-static /usr/bin/qemu-aarch64-static
 RUN zypper in -y python3-pip python3-kiwi xz jing
 
