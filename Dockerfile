@@ -25,6 +25,9 @@
 FROM artifactory.algol60.net/csm-docker/stable/docker.io/opensuse/leap:15.4 as base
 
 COPY requirements.txt constraints.txt /
+
+RUN wget https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static \
+&& mv ./qemu-aarch64-static /usr/bin/qemu-aarch64-static
 RUN zypper in -y python3-pip python3-kiwi xz jing
 
 # Apply security patches
