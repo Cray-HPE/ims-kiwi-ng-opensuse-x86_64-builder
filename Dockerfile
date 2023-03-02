@@ -22,13 +22,14 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 # Cray Image Management Service image build environment Dockerfile
-FROM arti.hpc.amslabs.hpecorp.net/baseos-docker-master-local/opensuse-leap:15.2 as base
+#FROM arti.hpc.amslabs.hpecorp.net/baseos-docker-master-local/opensuse-leap:15.2 as base
+FROM opensuse/leap:15.4 as base
 
 COPY requirements.txt constraints.txt /
 
-RUN zypper in -y python3-pip python3-kiwi xz jing curl
+RUN zypper in -y python3-pip python3-kiwi xz jing curl podman kmod make
 
-RUN curl -o qemu-aarch64-static https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static \
+RUN curl -o qemu-aarch64-static https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static  \
 && mv ./qemu-aarch64-static /usr/bin/qemu-aarch64-static
 
 # Apply security patches

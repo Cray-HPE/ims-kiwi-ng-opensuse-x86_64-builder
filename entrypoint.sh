@@ -49,7 +49,10 @@ if [ ! -f /proc/sys/fs/binfmt_misc/register ] ; then
 fi
     
 echo "- Setting up QEMU for ARM64"
-echo ":qemu-aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-static:OC" >> /proc/sys/fs/binfmt_misc/register
+echo ":qemu-aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-static:FC" >> /proc/sys/fs/binfmt_misc/register
+
+# Restart binfmt_misc
+service systemd-binfmt status
 
 # Make Cray's CA certificate a trusted system certificate within the container
 # This will not install the CA certificate into the kiwi imageroot.
@@ -72,6 +75,12 @@ python3 -m ims_python_helper image set_job_status $IMS_JOB_ID building_image
 DEBUG_FLAGS=""
 if [[ `echo $ENABLE_DEBUG | tr [:upper:] [:lower:]` = "true" ]]; then
     DEBUG_FLAGS="--debug"
+fi
+
+if [ $BUILD_ARCHITECTURE == "aarch64" ]; then
+	podman pull docker://registry.local/artifactory.algol60.net/csm-docker/stable/$IMS_ARM_BUILDER
+	podman run  --privileged --arch=arm64 -v /mnt/recipe/:/mnt/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/  $IMS_IMAGE
+	exit 0
 fi
 
 # Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
