@@ -86,7 +86,7 @@ pipeline {
 
         stage("Publish") {
             environment {
-                BUILD_ARGS = ""
+                BUILD_ARGS = " "
                 DOCKER_VERSION = sh(returnStdout: true, script: "head -1 .docker_version").trim()
             }
 
