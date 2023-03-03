@@ -58,7 +58,7 @@ kiwi-ng \
     --type tbz system build \
     --description $RECIPE_ROOT_PARENT \
     --target $IMAGE_ROOT_PARENT \
-    --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.arm64.rpm
+    --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.arm64.rpm \
     --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
     --signing-key /signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc
 rc=$?
