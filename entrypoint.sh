@@ -76,7 +76,7 @@ fi
 
 if [ $BUILD_ARCHITECTURE == "aarch64" ]; then
 	podman pull docker://registry.local/artifactory.algol60.net/csm-docker/stable/$IMS_ARM_BUILDER
-	podman run  --privileged --arch=arm64 --entrypoint "/scripts/armentry.sh" -v /mnt/recipe/:/mnt/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/  $IMS_ARM_BUILDER
+	podman run  --privileged --arch=arm64 --entrypoint "/scripts/armentry.sh" -v /mnt/recipe/:/mnt/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/  docker://registry.local/artifactory.algol60.net/csm-docker/stable/$IMS_ARM_BUILDER
 	exit 0
 fi
 
