@@ -47,4 +47,5 @@ RUN mkdir -p /scripts /signing-keys
 COPY signing-keys/HPE-SHASTA-RPM-PROD.asc /signing-keys
 COPY signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc /signing-keys
 COPY entrypoint.sh /scripts/entrypoint.sh
+COPY armentry.sh /scripts/armentry.sh
 ENTRYPOINT ["/scripts/entrypoint.sh"]
