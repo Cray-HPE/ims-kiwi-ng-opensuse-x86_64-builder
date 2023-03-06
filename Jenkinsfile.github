@@ -91,6 +91,7 @@ pipeline {
             }
 
             steps {
+                echo "Docker version is ${env.DOCKER_VERSION}"
                 publishCsmDockerImage(image: env.NAME, tag: env.DOCKER_VERSION, isStable: env.IS_STABLE, multiArch: true)
             }
         }
