@@ -47,8 +47,6 @@ if [[ ! $RC ]]; then
 	exit 1
 fi
 
-python3 -m ims_python_helper image set_job_status $IMS_JOB_ID building_image
-
 # Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
 # causes kiwi to install the cray-ca-cert rpm into the image root.
 kiwi-ng \
@@ -58,7 +56,7 @@ kiwi-ng \
     --type tbz system build \
     --description $RECIPE_ROOT_PARENT \
     --target $IMAGE_ROOT_PARENT \
-    --add-bootstrap-package /mnt/ca-rpm/cray_ca_cert-1.0.1-1.arm64.rpm \
+    --add-repo=source=https://packages.local/repository/cos-2.6.1-test-repo/,type=rpm-md,alias=cos-2.6.1-test-repo,priority=4,imageInclude=true,package_gpgcheck=false,repo_gpgcheck=false
     --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
     --signing-key /signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc
 rc=$?
