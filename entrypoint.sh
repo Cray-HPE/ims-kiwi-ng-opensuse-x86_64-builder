@@ -29,28 +29,6 @@ IMAGE_ROOT_PARENT=${2:-/mnt/image}
 PARAMETER_FILE_BUILD_FAILED=$IMAGE_ROOT_PARENT/build_failed
 PARAMETER_FILE_KIWI_LOGFILE=$IMAGE_ROOT_PARENT/kiwi.log
 
-# Regiser qemu-aarch64-static to act as an arm interpreter for arm builds 
-if [ ! -d /proc/sys/fs/binfmt_misc ] ; then
-    echo "- binfmt_misc does not appear to be loaded or isn't built in."
-    echo "  Trying to load it..."
-    if ! modprobe binfmt_misc ; then
-        echo "FATAL: Unable to load binfmt_misc"
-        exit 1;
-    fi
-fi
-
-if [ ! -f /proc/sys/fs/binfmt_misc/register ] ; then
-    echo "- The binfmt_misc filesystem does not appear to be mounted."
-    echo "  Trying to mount it..."
-    if ! mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc ; then
-        echo "FATAL:  Unable to mount binfmt_misc filesystem."
-        exit 1
-    fi
-fi
-    
-echo "- Setting up QEMU for ARM64"
-echo ":qemu-aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-static:FC" >> /proc/sys/fs/binfmt_misc/register
-
 # Make Cray's CA certificate a trusted system certificate within the container
 # This will not install the CA certificate into the kiwi imageroot.
 CA_CERT='/etc/cray/ca/certificate_authority.crt'
@@ -74,17 +52,42 @@ if [[ `echo $ENABLE_DEBUG | tr [:upper:] [:lower:]` = "true" ]]; then
     DEBUG_FLAGS="--debug"
 fi
 
-if [ $BUILD_ARCHITECTURE == "aarch64" ]; then
-	podman pull --arch=arm64 docker://registry.local/artifactory.algol60.net/csm-docker/stable/$IMS_ARM_BUILDER
-	podman run  --privileged --arch=arm64 --entrypoint "/scripts/armentry.sh" -v /mnt/recipe/:/mnt/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm  docker://registry.local/artifactory.algol60.net/csm-docker/stable/$IMS_ARM_BUILDER
-	exit 0
+if [ $BUILD_PLATFORM == "aarch64" ]; then
+    # Regiser qemu-aarch64-static to act as an arm interpreter for arm builds 
+    if [ ! -d /proc/sys/fs/binfmt_misc ] ; then
+        echo "- binfmt_misc does not appear to be loaded or isn't built in."
+        echo "  Trying to load it..."
+        if ! modprobe binfmt_misc ; then
+            echo "FATAL: Unable to load binfmt_misc"
+            exit 1;
+        fi
+    fi
+
+    # mount the filesystem
+    if [ ! -f /proc/sys/fs/binfmt_misc/register ] ; then
+        echo "- The binfmt_misc filesystem does not appear to be mounted."
+        echo "  Trying to mount it..."
+        if ! mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc ; then
+            echo "FATAL:  Unable to mount binfmt_misc filesystem."
+            exit 1
+        fi
+    fi
+
+    # register qemu for aarch64 images 
+    echo "- Setting up QEMU for ARM64"
+    echo ":qemu-aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-static:FC" >> /proc/sys/fs/binfmt_misc/register
+
+    # run the arm64 kiwi build
+    podman pull --arch=arm64 docker://registry.local/artifactory.algol60.net/csm-docker/stable/$IMS_ARM_BUILDER
+    podman run  --privileged --arch=arm64 --entrypoint "/scripts/armentry.sh" -v /mnt/recipe/:/mnt/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm  docker://registry.local/artifactory.algol60.net/csm-docker/stable/$IMS_ARM_BUILDER
+    exit 0
 fi
 
 # Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
 # causes kiwi to install the cray-ca-cert rpm into the image root.
 kiwi-ng \
     $DEBUG_FLAGS \
-    --target-arch=$BUILD_ARCHITECTURE \
+    --target-arch=$BUILD_PLATFORM \
     --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
     --type tbz system build \
     --description $RECIPE_ROOT_PARENT \
