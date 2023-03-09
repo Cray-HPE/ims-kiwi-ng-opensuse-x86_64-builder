@@ -62,6 +62,8 @@ rc=$?
 
 if [ "$rc" -ne "0" ]; then
   echo "ERROR: Kiwi reported a build error."
+  echo "Outputting kiwi log file."
+  cat $PARAMETER_FILE_KIWI_LOGFILE
   touch $PARAMETER_FILE_BUILD_FAILED
 fi
 
