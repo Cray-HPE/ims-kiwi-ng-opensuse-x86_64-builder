@@ -83,7 +83,7 @@ if [ $BUILD_PLATFORM == "aarch64" ]; then
 
     # run the arm64 kiwi build
     podman pull --arch=arm64 docker://registry.local/artifactory.algol60.net/csm-docker/stable/$IMS_ARM_BUILDER
-    podman run  --privileged --arch=arm64 --entrypoint "/scripts/armentry.sh" -v /mnt/recipe/:/mnt/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm  docker://registry.local/artifactory.algol60.net/csm-docker/stable/$IMS_ARM_BUILDER
+    podman run  --privileged --arch=arm64 --entrypoint "/scripts/armentry.sh" -e BUILD_PLATFORM=$BUILD_PLATFORM -v /mnt/recipe/:/mnt/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm  docker://registry.local/artifactory.algol60.net/csm-docker/stable/$IMS_ARM_BUILDER
     exit 0
 fi
 
