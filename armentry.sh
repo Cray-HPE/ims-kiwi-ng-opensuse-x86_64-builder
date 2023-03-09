@@ -56,7 +56,6 @@ kiwi-ng \
     --type tbz system build \
     --description $RECIPE_ROOT_PARENT \
     --target $IMAGE_ROOT_PARENT \
-    --add-repo=source=https://packages.local/repository/cos-2.6.1-test-repo/,imageInclude=false,type=rpm-md,alias=cos-2.6.1-test-repo,priority=4,package_gpgcheck=false,repo_gpgcheck=false \
     --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
     --signing-key /signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc
 rc=$?
