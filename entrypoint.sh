@@ -79,7 +79,7 @@ if [ $BUILD_PLATFORM == "aarch64" ]; then
     fi
     # register qemu for aarch64 images 
     echo "- Setting up QEMU for ARM64"
-    echo ":qemu-aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-static:FC" >> /proc/sys/fs/binfmt_misc/register
+    echo ":qemu-aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-static:OC" >> /proc/sys/fs/binfmt_misc/register
 
     # run the arm64 kiwi build
     podman pull --arch=arm64 docker://registry.local/artifactory.algol60.net/csm-docker/stable/$IMS_ARM_BUILDER
