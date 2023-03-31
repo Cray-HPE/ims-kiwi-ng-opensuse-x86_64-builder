@@ -45,6 +45,7 @@ if [[ ! $RC ]]; then
 	exit 1
 fi
 
+echo "Setting ims job status to building_image"
 python3 -m ims_python_helper image set_job_status $IMS_JOB_ID building_image
 
 DEBUG_FLAGS=""
@@ -52,7 +53,9 @@ if [[ `echo $ENABLE_DEBUG | tr [:upper:] [:lower:]` = "true" ]]; then
     DEBUG_FLAGS="--debug"
 fi
 
+echo "Checking build platform: $BUILD_PLATFORM"
 if [ $BUILD_PLATFORM == "aarch64" ]; then
+    echo "Build platform is aarch64"
     # Regiser qemu-aarch64-static to act as an arm interpreter for arm builds 
     if [ ! -d /proc/sys/fs/binfmt_misc ] ; then
         echo "- binfmt_misc does not appear to be loaded or isn't built in."
@@ -85,6 +88,7 @@ fi
 
 # Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
 # causes kiwi to install the cray-ca-cert rpm into the image root.
+echo "Calling kiwi-ng build..."
 kiwi-ng \
     $DEBUG_FLAGS \
     --target-arch=$BUILD_PLATFORM \
