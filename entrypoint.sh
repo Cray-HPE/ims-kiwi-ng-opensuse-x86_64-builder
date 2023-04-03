@@ -24,6 +24,8 @@
 #
 set -x
 
+echo on
+
 RECIPE_ROOT_PARENT=${1:-/mnt/recipe}
 IMAGE_ROOT_PARENT=${2:-/mnt/image}
 PARAMETER_FILE_BUILD_FAILED=$IMAGE_ROOT_PARENT/build_failed
@@ -92,10 +94,12 @@ fi
 
 # Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
 # causes kiwi to install the cray-ca-cert rpm into the image root.
+
+#     --target-arch=$BUILD_PLATFORM \
+
 echo "Calling kiwi-ng build..."
 kiwi-ng \
     $DEBUG_FLAGS \
-    --target-arch=$BUILD_PLATFORM \
     --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
     --type tbz system build \
     --description $RECIPE_ROOT_PARENT \
