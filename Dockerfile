@@ -31,7 +31,8 @@ RUN zypper in -y python3-pip python3-kiwi xz jing curl podman kmod make
 
 RUN curl -o qemu-aarch64-static https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static  \
 && mv ./qemu-aarch64-static /usr/bin/qemu-aarch64-static && chmod +x /usr/bin/qemu-aarch64-static
-
+RUN curl -o cos-2.6.1 https://arti.hpc.amslabs.hpecorp.net/artifactory/shasta-distribution-master-local/cos/cos-2.6.1-20230123170621.tar.gz \
+&& mv ./cos-2.6.1 /cos-2.6.1
 # Apply security patches
 COPY zypper-refresh-patch-clean.sh /
 RUN /zypper-refresh-patch-clean.sh && rm /zypper-refresh-patch-clean.sh
