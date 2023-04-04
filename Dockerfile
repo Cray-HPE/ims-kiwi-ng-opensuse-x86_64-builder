@@ -25,7 +25,7 @@
 FROM docker.io/opensuse/leap:15.4 as base
 
 COPY requirements.txt constraints.txt /
-RUN zypper in -y python3-pip python3-kiwi xz jing
+RUN zypper in -y python3-pip python3-kiwi xz jing curl podman kmod make
 
 # Apply security patches
 COPY zypper-refresh-patch-clean.sh /
