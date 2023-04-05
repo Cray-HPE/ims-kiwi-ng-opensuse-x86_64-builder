@@ -56,7 +56,7 @@ fi
 
 echo "Checking build platform: $BUILD_PLATFORM"
 #if [ $BUILD_PLATFORM == "aarch64" ]; then
-if [ 0 ]; then
+if false; then
     echo "Build platform is aarch64"
     # Regiser qemu-aarch64-static to act as an arm interpreter for arm builds 
     if [ ! -d /proc/sys/fs/binfmt_misc ] ; then
