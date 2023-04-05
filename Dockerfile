@@ -22,17 +22,22 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 # Cray Image Management Service image build environment Dockerfile
-FROM arti.hpc.amslabs.hpecorp.net/baseos-docker-master-local/opensuse-leap:15.2 as base
-#FROM opensuse/leap:15.4 as base
+#FROM arti.hpc.amslabs.hpecorp.net/baseos-docker-master-local/opensuse-leap:15.2 as base
+FROM opensuse/leap:15.4 as base
 
 COPY requirements.txt constraints.txt /
 
 RUN zypper in -y python3-pip python3-kiwi xz jing curl podman kmod make
 
+# Install qemu-aarch64-static binary to handle arm64 emulation if needed
 RUN curl -o qemu-aarch64-static https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static  \
 && mv ./qemu-aarch64-static /usr/bin/qemu-aarch64-static && chmod +x /usr/bin/qemu-aarch64-static
+
+# Install cos tarball
+# TODO - remove this before merge to develop
 RUN curl -o cos-2.6.1.tar.gz https://arti.hpc.amslabs.hpecorp.net/artifactory/shasta-distribution-master-local/cos/cos-2.6.1-20230123170621.tar.gz \
 && tar xzvf cos-2.6.1.tar.gz && mv cos-2.6.1-20230123170621/rpms/cray-sles15-sp4-cn ./ && rm -rf cos-2.6.1-20230123170621 && rm -rf cos-2.6.1.tar.gz 
+
 # Apply security patches
 COPY zypper-refresh-patch-clean.sh /
 RUN /zypper-refresh-patch-clean.sh && rm /zypper-refresh-patch-clean.sh
