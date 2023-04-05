@@ -96,9 +96,9 @@ fi
 # causes kiwi to install the cray-ca-cert rpm into the image root.
 
 echo "Calling kiwi-ng build..."
+#    --target-arch=$BUILD_PLATFORM \
 kiwi-ng \
     $DEBUG_FLAGS \
-    --target-arch=$BUILD_PLATFORM \
     --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
     --type tbz system build \
     --description $RECIPE_ROOT_PARENT \
