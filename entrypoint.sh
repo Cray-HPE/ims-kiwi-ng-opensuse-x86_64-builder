@@ -55,8 +55,7 @@ if [[ `echo $ENABLE_DEBUG | tr [:upper:] [:lower:]` = "true" ]]; then
 fi
 
 echo "Checking build platform: $BUILD_PLATFORM"
-#if [ $BUILD_PLATFORM == "aarch64" ]; then
-if false; then
+if [ $BUILD_PLATFORM == "aarch64" ]; then
     echo "Build platform is aarch64"
     # Regiser qemu-aarch64-static to act as an arm interpreter for arm builds 
     if [ ! -d /proc/sys/fs/binfmt_misc ] ; then
@@ -96,9 +95,9 @@ fi
 # causes kiwi to install the cray-ca-cert rpm into the image root.
 
 echo "Calling kiwi-ng build..."
-#    --target-arch=$BUILD_PLATFORM \
 kiwi-ng \
     $DEBUG_FLAGS \
+    --target-arch=$BUILD_PLATFORM \
     --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
     --type tbz system build \
     --description $RECIPE_ROOT_PARENT \
