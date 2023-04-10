@@ -35,8 +35,8 @@ RUN curl -o qemu-aarch64-static https://github.com/multiarch/qemu-user-static/re
 
 # Install cos tarball
 # TODO - remove this before merge to develop
-RUN curl -o cos-2.6.1.tar.gz https://arti.hpc.amslabs.hpecorp.net/artifactory/shasta-distribution-master-local/cos/cos-2.6.1-20230123170621.tar.gz \
-&& tar xzvf cos-2.6.1.tar.gz && mv cos-2.6.1-20230123170621/rpms/cray-sles15-sp4-cn ./ && rm -rf cos-2.6.1-20230123170621 && rm -rf cos-2.6.1.tar.gz 
+#RUN curl -o cos-2.6.1.tar.gz https://arti.hpc.amslabs.hpecorp.net/artifactory/shasta-distribution-master-local/cos/cos-2.6.1-20230123170621.tar.gz \
+#&& tar xzvf cos-2.6.1.tar.gz && mv cos-2.6.1-20230123170621/rpms/cray-sles15-sp4-cn ./ && rm -rf cos-2.6.1-20230123170621 && rm -rf cos-2.6.1.tar.gz 
 
 # Apply security patches
 COPY zypper-refresh-patch-clean.sh /
