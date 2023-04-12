@@ -75,15 +75,18 @@ if [ $BUILD_PLATFORM == "aarch64" ]; then
             echo "FATAL:  Unable to mount binfmt_misc filesystem."
             exit 1
         fi
-    fi
-
+    fi:
     if [ -f /proc/sys/fs/binfmt_misc/qemu-aarch64 ] ; then
         echo "- Removing old QEMU ARM64 setup."
         echo "-1" >> /proc/sys/fs/binfmt_misc/qemu-aarch64
     fi
     # register qemu for aarch64 images 
     echo "- Setting up QEMU for ARM64"
-    echo ":qemu-aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-static:OC" >> /proc/sys/fs/binfmt_misc/register
+    echo ":qemu-aarch64:M::\x7f\x45\x4c\x46\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-static:F" >> /proc/sys/fs/binfmt_misc/register
+    echo ":qemu-arm:M::\x7f\x45\x4c\x46\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm64-static:F" >> /proc/sys/fs/binfmt_misc/register
+
+    # orig setting - 'ELF' below looks suspicious:
+    #echo ":qemu-aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-static:OC" >> /proc/sys/fs/binfmt_misc/register
 
     # run the arm64 kiwi build
     podman pull --platform linux/arm64 docker://registry.local/$IMS_ARM_BUILDER
