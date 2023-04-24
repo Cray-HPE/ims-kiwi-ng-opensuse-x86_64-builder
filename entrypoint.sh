@@ -55,7 +55,7 @@ if [[ `echo $ENABLE_DEBUG | tr [:upper:] [:lower:]` = "true" ]]; then
 fi
 
 echo "Checking build platform: $BUILD_PLATFORM"
-if [ $BUILD_PLATFORM == "aarch64" ]; then
+if [ "$BUILD_PLATFORM" == "aarch64" ]; then
     echo "Build platform is aarch64"
     # Regiser qemu-aarch64-static to act as an arm interpreter for arm builds 
     if [ ! -d /proc/sys/fs/binfmt_misc ] ; then
@@ -83,7 +83,7 @@ if [ $BUILD_PLATFORM == "aarch64" ]; then
     # register qemu for aarch64 images 
     echo "- Setting up QEMU for ARM64"
     echo ":qemu-aarch64:M::\x7f\x45\x4c\x46\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-static:F" >> /proc/sys/fs/binfmt_misc/register
-    echo ":qemu-arm:M::\x7f\x45\x4c\x46\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm64-static:F" >> /proc/sys/fs/binfmt_misc/register
+    #echo ":qemu-arm:M::\x7f\x45\x4c\x46\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm64-static:F" >> /proc/sys/fs/binfmt_misc/register
 
     # orig setting - 'ELF' below looks suspicious:
     #echo ":qemu-aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-static:OC" >> /proc/sys/fs/binfmt_misc/register
