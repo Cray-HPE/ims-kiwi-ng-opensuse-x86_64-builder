@@ -75,7 +75,7 @@ if [ "$BUILD_PLATFORM" == "aarch64" ]; then
             echo "FATAL:  Unable to mount binfmt_misc filesystem."
             exit 1
         fi
-    fi:
+    fi
     if [ -f /proc/sys/fs/binfmt_misc/qemu-aarch64 ] ; then
         echo "- Removing old QEMU ARM64 setup."
         echo "-1" >> /proc/sys/fs/binfmt_misc/qemu-aarch64
