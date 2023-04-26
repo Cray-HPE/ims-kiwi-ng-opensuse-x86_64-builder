@@ -1,9 +1,9 @@
-#  ims-kiwi-ng-opensuse-x86_64-builder
+# ims-kiwi-ng-opensuse-x86_64-builder
 An openSUSE x86-64-based Docker image containing the kiwi-ng tool for image 
 building. This is part of the CMS Image Management and Image Customization
 toolset for Shasta-based systems.
 
-##IMS Workflow
+## IMS Workflow
 
 This container is part of the IMS workflow used to create new images from a kiwi
 recipe description. Upon successful building of a recipe, the follow on containers
@@ -18,7 +18,7 @@ In the case of a failure, follow on containers have the option of enabling a SSH
 shell where the administrator can access the failed image root in order to determine
 the nature of the failure and how to resolve. 
 
-# Container Runs as Root
+## Container Runs as Root
 
 Kiwi-ng must be run as root in order to build and chroot into the image root being 
 built. There are Kiwi plugins that allow Kiwi-ng to not require root access, however 
@@ -95,24 +95,6 @@ on github, the cloneCMSMetaTools() function clones the cms-meta-tools repo into 
 For a local build, you will also need to manually write the .version, .docker_version (if this repo
 builds a docker image), and .chart_version (if this repo builds a helm chart) files. When building
 on github, this is done by the setVersionFiles() function.
-
-## Versioning
-The version of this repo is generated dynamically at build time by running the version.py script in 
-cms-meta-tools. The version is included near the very beginning of the github build output. 
-
-In order to make it easier to go from an artifact back to the source code that produced that artifact,
-a text file named gitInfo.txt is added to Docker images built from this repo. For Docker images,
-it can be found in the / folder. This file contains the branch from which it was built and the most
-recent commits to that branch. 
-
-For helm charts, a few annotation metadata fields are appended which contain similar information.
-
-For RPMs, a changelog entry is added with similar information.
-
-## New Release Branches
-When making a new release branch:
-    * Be sure to set the `.x` and `.y` files to the desired major and minor version number for this repo for this release. 
-    * If an `update_external_versions.conf` file exists in this repo, be sure to update that as well, if needed.
 
 ## Authors
 * Eric Cozzi
