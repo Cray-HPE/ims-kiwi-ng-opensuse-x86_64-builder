@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2019-2022 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2019-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -25,6 +25,7 @@
 # cms-meta-tools repo to ./cms_meta_tools
 
 NAME ?= ims-kiwi-ng-opensuse-x86_64-builder
+
 DOCKER_VERSION ?= $(shell head -1 .docker_version)
 
 ifneq ($(wildcard ${HOME}/.netrc),)
@@ -40,4 +41,6 @@ lint:
 		./cms_meta_tools/scripts/runLint.sh
 
 image:
-		docker build --pull ${DOCKER_ARGS} --tag '${NAME}:${DOCKER_VERSION}' .
+		docker buildx create --use
+		docker buildx build --platform=linux/amd64,linux/arm64 --pull ${DOCKER_ARGS} .
+		docker buildx build --platform=linux/amd64 --load --tag '${NAME}:${DOCKER_VERSION}' .
