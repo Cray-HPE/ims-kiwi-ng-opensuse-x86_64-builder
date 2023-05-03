@@ -22,10 +22,16 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 # Cray Image Management Service image build environment Dockerfile
-FROM artifactory.algol60.net/csm-docker/stable/docker.io/opensuse/leap:15.4 as base
+# NOTE - currently the algol version does not have arm64 platform - update this when it does
+#FROM artifactory.algol60.net/csm-docker/stable/docker.io/opensuse/leap:15.4 as base
+FROM opensuse/leap:15.4 as base
 
 COPY requirements.txt constraints.txt /
-RUN zypper in -y python3-pip python3-kiwi xz jing
+RUN zypper in -y python3-pip python3-kiwi xz jing curl podman kmod make wget
+
+# Install qemu-aarch64-static binary to handle arm64 emulation if needed
+RUN wget https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static && \
+    mv ./qemu-aarch64-static /usr/bin/qemu-aarch64-static && chmod +x /usr/bin/qemu-aarch64-static
 
 # Apply security patches
 COPY zypper-refresh-patch-clean.sh /
@@ -42,4 +48,5 @@ RUN mkdir -p /scripts /signing-keys
 COPY signing-keys/HPE-SHASTA-RPM-PROD.asc /signing-keys
 COPY signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc /signing-keys
 COPY entrypoint.sh /scripts/entrypoint.sh
+COPY armentry.sh /scripts/armentry.sh
 ENTRYPOINT ["/scripts/entrypoint.sh"]

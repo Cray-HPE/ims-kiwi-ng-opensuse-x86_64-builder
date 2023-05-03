@@ -86,10 +86,12 @@ pipeline {
 
         stage("Publish") {
             environment {
+                BUILD_ARGS = " "
                 DOCKER_VERSION = sh(returnStdout: true, script: "head -1 .docker_version").trim()
             }
 
             steps {
+                echo "Docker version is ${env.DOCKER_VERSION}"
                 publishCsmDockerImage(image: env.NAME, tag: env.DOCKER_VERSION, isStable: env.IS_STABLE, multiArch: true)
             }
         }
