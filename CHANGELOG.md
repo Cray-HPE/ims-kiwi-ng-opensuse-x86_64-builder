@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - CASMCMS-8366 - add support for arm64 to the docker image.
 - CASMCMS-8459 - more arm64 support.
+- CASMCMS-8595 - rename platform to arch
 
 ### Removed
 - Removed defunct files leftover from previous versioning system
