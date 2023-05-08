@@ -56,9 +56,9 @@ fi
 
 # If this is running an arm64 emulation we need to set up the emulator, then
 # run the arm64 version of the ims-kiwi-build image.
-echo "Checking build platform: $BUILD_PLATFORM"
-if [ "$BUILD_PLATFORM" == "aarch64" ]; then
-    echo "Build platform is aarch64"
+echo "Checking build architecture: $BUILD_ARCH"
+if [ "$BUILD_ARCH" == "aarch64" ]; then
+    echo "Build architecture is aarch64"
     # Regiser qemu-aarch64-static to act as an arm interpreter for arm builds 
     if [ ! -d /proc/sys/fs/binfmt_misc ] ; then
         echo "- binfmt_misc does not appear to be loaded or isn't built in."
@@ -87,7 +87,7 @@ if [ "$BUILD_PLATFORM" == "aarch64" ]; then
 
     # run the arm64 kiwi build inside this new pod
     podman pull --platform linux/arm64 docker://registry.local/$IMS_ARM_BUILDER
-    podman run  --privileged --platform linux/arm64 --entrypoint "/scripts/armentry.sh" -e BUILD_PLATFORM=$BUILD_PLATFORM -v /mnt/recipe/:/mnt/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm  docker://registry.local/$IMS_ARM_BUILDER
+    podman run  --privileged --platform linux/arm64 --entrypoint "/scripts/armentry.sh" -e BUILD_ARCH=$BUILD_ARCH -v /mnt/recipe/:/mnt/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm  docker://registry.local/$IMS_ARM_BUILDER
     exit 0
 fi
 
