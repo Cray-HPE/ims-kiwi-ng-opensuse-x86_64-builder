@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.1] - 2023-5-16
+### Changed
+- CASMCMS-8365 - tweaks to get arm64 recipes to build.
+
 ## [1.5.0] - 2023-5-03
 ### Added
 - CASMCMS-8366 - add support for arm64 to the docker image.
