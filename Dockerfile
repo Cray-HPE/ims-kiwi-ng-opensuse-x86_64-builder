@@ -27,7 +27,7 @@
 FROM opensuse/leap:15.4 as base
 
 COPY requirements.txt constraints.txt /
-RUN zypper in -y python3-pip python3-kiwi xz jing curl podman kmod make wget fuse fuse-overlayfs
+RUN zypper in -y python3-pip python3-kiwi xz jing curl podman kmod make wget fuse fuse-overlayfs docker
 
 # Install qemu-aarch64-static binary to handle arm64 emulation if needed
 RUN wget https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static && \
