@@ -90,7 +90,7 @@ if [ "$BUILD_ARCH" == "aarch64" ]; then
 
     # run the arm64 kiwi build inside this new pod
     podman --storage-driver=vfs pull --platform linux/arm64 docker://registry.local/$IMS_ARM_BUILDER
-    podman --storage-driver=vfs run  --privileged --platform linux/arm64 --entrypoint "/scripts/armentry.sh" -e BUILD_ARCH=$BUILD_ARCH -v /mnt/recipe/:/mnt/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm  docker://registry.local/$IMS_ARM_BUILDER
+    podman --storage-driver=vfs run  --privileged --platform linux/arm64 --entrypoint "/scripts/armentry.sh" -e BUILD_ARCH=$BUILD_ARCH -v /mnt/recipe/:/mnt/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm -v /signing-keys:/signing-keys/   docker://registry.local/$IMS_ARM_BUILDER
     exit 0
 fi
 
