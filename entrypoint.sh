@@ -85,9 +85,12 @@ if [ "$BUILD_ARCH" == "aarch64" ]; then
         echo ":qemu-aarch64:M::\x7f\x45\x4c\x46\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-static:F" >> /proc/sys/fs/binfmt_misc/register
     fi
 
+    # Remove podman references to overlayfs to utilize vfs instead
+    rm -rf /var/lib/containers/
+
     # run the arm64 kiwi build inside this new pod
-    podman --storage-opt mount_program=/usr/bin/fuse-overlayfs --storage-opt ignore_chown_errors=true pull --platform linux/arm64 docker://registry.local/$IMS_ARM_BUILDER
-    podman --storage-opt mount_program=/usr/bin/fuse-overlayfs --storage-opt ignore_chown_errors=true run  --privileged --platform linux/arm64 --entrypoint "/scripts/armentry.sh" -e BUILD_ARCH=$BUILD_ARCH -v /mnt/recipe/:/mnt/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm  docker://registry.local/$IMS_ARM_BUILDER
+    podman --storage-driver=vfs pull --platform linux/arm64 docker://registry.local/$IMS_ARM_BUILDER
+    podman --storage-driver=vfs run  --privileged --platform linux/arm64 --entrypoint "/scripts/armentry.sh" -e BUILD_ARCH=$BUILD_ARCH -v /mnt/recipe/:/mnt/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm  docker://registry.local/$IMS_ARM_BUILDER
     exit 0
 fi
 
