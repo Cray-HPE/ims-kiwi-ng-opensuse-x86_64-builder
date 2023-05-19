@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.2] - 2023-5-18
+- CASMCMS-8566 - utilize podman vfs storage driver for kata runtime
+
 ## [1.5.1] - 2023-5-16
 ### Changed
 - CASMCMS-8365 - tweaks to get arm64 recipes to build.
