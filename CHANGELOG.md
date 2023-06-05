@@ -7,14 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.5.2] - 2023-5-18
+## [1.5.3] - 2023-06-18
+### Changed
+- CASM-4232: Require at least version 2.14.0 of `ims-python-helper` in order to get associated logging enhancements.
+
+## [1.5.2] - 2023-05-18
+### Changed
 - CASMCMS-8566 - utilize podman vfs storage driver for kata runtime
 
-## [1.5.1] - 2023-5-16
+## [1.5.1] - 2023-05-16
 ### Changed
 - CASMCMS-8365 - tweaks to get arm64 recipes to build.
 
-## [1.5.0] - 2023-5-03
+## [1.5.0] - 2023-05-03
 ### Added
 - CASMCMS-8366 - add support for arm64 to the docker image.
 - CASMCMS-8459 - more arm64 support.
@@ -27,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add Artifactory authentication to Jenkinsfile
 
-## [1.4.1] - 2022-012-02
+## [1.4.1] - 2022-12-02
 ### Added
 - Authenticate to CSM's artifactory
 
