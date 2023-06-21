@@ -22,9 +22,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 # Cray Image Management Service image build environment Dockerfile
-# NOTE - currently the algol version does not have arm64 platform - update this when it does
-#FROM artifactory.algol60.net/csm-docker/stable/docker.io/opensuse/leap:15.4 as base
-FROM opensuse/leap:15.4 as base
+FROM artifactory.algol60.net/csm-docker/stable/docker.io/opensuse/leap:15.4 as base
 
 COPY requirements.txt constraints.txt /
 RUN zypper in -y python3-pip python3-kiwi xz jing curl podman kmod make wget 
