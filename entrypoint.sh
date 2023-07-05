@@ -101,7 +101,7 @@ kiwi-ng \
     $DEBUG_FLAGS \
     --target-arch x86_64 \ 
     --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
-      system prepare \
+    --type tbz system prepare \
     --description $RECIPE_ROOT_PARENT \
     --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.noarch.rpm \
     --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
@@ -113,7 +113,7 @@ kiwi-ng \
     $DEBUG_FLAGS \
     --target-arch x86_64 \
     --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
-      system create \
+    --type tbz system create \
     --root $IMAGE_ROOT_PARENT \ 
     --target-dir $IMAGE_ROOT_PARENT \
     --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
