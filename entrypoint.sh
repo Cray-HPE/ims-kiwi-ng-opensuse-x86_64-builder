@@ -94,19 +94,48 @@ if [ "$BUILD_ARCH" == "aarch64" ]; then
     exit 0
 fi
 
-# Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
-# causes kiwi to install the cray-ca-cert rpm into the image root.
-echo "Calling kiwi-ng build..."
+
+echo "Calling kiwi ng prepare"
+
 kiwi-ng \
     $DEBUG_FLAGS \
+    --target-arch x86_64 \ 
     --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
-    --type tbz system build \
+      system prepare \
     --description $RECIPE_ROOT_PARENT \
-    --target $IMAGE_ROOT_PARENT \
     --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.noarch.rpm \
     --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
-    --signing-key /signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc
+    --signing-key /signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc \
+
 rc=$?
+
+echo "Calling kiwi ng create"
+kiwi-ng \ 
+    $DEBUG_FLAGS \
+    --target-arch x86_64 \
+    --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
+      system create \
+    --root $IMAGE_ROOT_PARENT \ 
+    --target-dir $IMAGE_ROOT_PARENT \
+    --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
+    --signing-key /signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc 
+rc=$?
+
+
+
+# Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
+# causes kiwi to install the cray-ca-cert rpm into the image root.
+# echo "Calling kiwi-ng build..."
+# kiwi-ng \
+#     $DEBUG_FLAGS \
+#     --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
+#     --type tbz system build \
+#     --description $RECIPE_ROOT_PARENT \
+#     --target $IMAGE_ROOT_PARENT \
+#     --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.noarch.rpm \
+#     --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
+#     --signing-key /signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc
+# rc=$?
 
 if [ "$rc" -ne "0" ]; then
   echo "ERROR: Kiwi reported a build error."
