@@ -94,7 +94,6 @@ if [ "$BUILD_ARCH" == "aarch64" ]; then
     exit 0
 fi
 
-
 echo "Calling kiwi ng prepare"
 
 kiwi-ng \
@@ -102,6 +101,7 @@ kiwi-ng \
     --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
     --type tbz system prepare \
     --description $RECIPE_ROOT_PARENT \
+    --root $IMAGE_ROOT_PARENT \
     --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.noarch.rpm \
     --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
     --signing-key /signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc 
