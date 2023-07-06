@@ -28,8 +28,8 @@ echo on
 RECIPE_ROOT_PARENT=${1:-/mnt/recipe}
 IMAGE_ROOT_PARENT=${2:-/mnt/image}
 PARAMETER_FILE_BUILD_FAILED=$IMAGE_ROOT_PARENT/build_failed
-PARAMETER_FILE_KIWI_LOGFILE=$IMAGE_ROOT_PARENT/kiwi.log
-
+PARAMETER_FILE_KIWI_PREPARE_LOGFILE=$IMAGE_ROOT_PARENT/prepare-kiwi.log
+PARAMETER_FILE_KIWI_CREATE_LOGFILE=$IMAGE_ROOT_PARENT/create-kiwi.log
 # Make Cray's CA certificate a trusted system certificate within the container
 # This will not install the CA certificate into the kiwi imageroot.
 CA_CERT='/etc/cray/ca/certificate_authority.crt'
@@ -98,7 +98,7 @@ echo "Calling kiwi ng prepare"
 
 kiwi-ng \
     $DEBUG_FLAGS \
-    --logfile="prepare-$PARAMETER_FILE_KIWI_LOGFILE" \
+    --logfile=PARAMETER_FILE_KIWI_PREPARE_LOGFILE \
     --type tbz system prepare \
     --description $RECIPE_ROOT_PARENT \
     --root $IMAGE_ROOT_PARENT/build/image-root \
@@ -111,7 +111,7 @@ rc=$?
 echo "Calling kiwi ng create"
 kiwi-ng \ 
     $DEBUG_FLAGS \
-    --logfile="create-$PARAMETER_FILE_KIWI_LOGFILE" \
+    --logfile=PARAMETER_FILE_KIWI_CREATE_LOGFILE \
     --type tbz system create \
     --root $IMAGE_ROOT_PARENT/build/image-root \ 
     --target-dir $IMAGE_ROOT_PARENT/build/image-root \
