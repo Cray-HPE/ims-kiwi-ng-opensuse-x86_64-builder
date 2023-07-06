@@ -98,7 +98,7 @@ echo "Calling kiwi ng prepare"
 
 kiwi-ng \
     $DEBUG_FLAGS \
-    --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
+    --logfile="prepare-$PARAMETER_FILE_KIWI_LOGFILE" \
     --type tbz system prepare \
     --description $RECIPE_ROOT_PARENT \
     --root $IMAGE_ROOT_PARENT/build/image-root \
@@ -111,7 +111,7 @@ rc=$?
 echo "Calling kiwi ng create"
 kiwi-ng \ 
     $DEBUG_FLAGS \
-    --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
+    --logfile="create-$PARAMETER_FILE_KIWI_LOGFILE" \
     --type tbz system create \
     --root $IMAGE_ROOT_PARENT/build/image-root \ 
     --target-dir $IMAGE_ROOT_PARENT/build/image-root \
