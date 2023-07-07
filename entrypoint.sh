@@ -100,6 +100,7 @@ kiwi-ng \
     $DEBUG_FLAGS \
     --logfile=$PARAMETER_FILE_KIWI_PREPARE_LOGFILE \
     --type tbz system prepare \
+    --target-arch aarch64
     --description $RECIPE_ROOT_PARENT \
     --root $IMAGE_ROOT_PARENT/build/image-root \
     --allow-existing-root \
