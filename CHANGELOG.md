@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.5.5] - 2023-07-11
 - CASMCMS-8708 Rework multi-image build
 
 ## [1.5.4] - 2023-06-15
