@@ -25,8 +25,12 @@
 # cms-meta-tools repo to ./cms_meta_tools
 
 NAME ?= ims-kiwi-ng-opensuse-x86_64-builder
-
 DOCKER_VERSION ?= $(shell head -1 .docker_version)
+ifeq ($(IS_STABLE),true)
+	DOCKER_NAME ?= artifactory.algol60.net/csm-docker/stable/$(NAME)
+else
+	DOCKER_NAME ?= artifactory.algol60.net/csm-docker/unstable/$(NAME)
+endif
 
 ifneq ($(wildcard ${HOME}/.netrc),)
         DOCKER_ARGS ?= --secret id=netrc,src=${HOME}/.netrc
@@ -42,5 +46,8 @@ lint:
 
 image:
 		docker buildx create --use
-		docker buildx build --platform=linux/amd64,linux/arm64 --pull ${DOCKER_ARGS} .
-		docker buildx build --platform=linux/amd64 --load --tag '${NAME}:${DOCKER_VERSION}' .
+		docker buildx build --push --platform=linux/amd64,linux/arm64 ${DOCKER_ARGS} --tag '${DOCKER_NAME}:${DOCKER_VERSION}' .
+
+image_local:
+		docker buildx create --use
+		docker buildx build --load ${DOCKER_ARGS} --tag '${DOCKER_NAME}:${DOCKER_VERSION}' .

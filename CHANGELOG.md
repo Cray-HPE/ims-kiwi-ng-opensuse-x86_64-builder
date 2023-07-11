@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.5] - 2023-07-11
+- CASMCMS-8708 Rework multi-image build
+
 ## [1.5.4] - 2023-06-15
 ### Changed
 - CASM-8590: Utilize artifactory image for Dockerfile 
