@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.6] - 2023-07-11
+### Changed
+- CASMCMS-8708: Rework multi-image build to include build metadata for nightly rebuilds.
+
+## [1.5.5] - ????
+### Changed
+- CASMCMS-8590: pull base images from algol60.
+
 ## [1.5.4] - 2023-06-15
 ### Changed
 - CASM-8590: Utilize artifactory image for Dockerfile 
