@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Dependencies
 - CASMCMS-8722: Use `update_external_versions` to get latest patch version of `ims-python-helper` Python module.
+- Bumped dependency patch versions:
+| Package                  | From     | To       |
+|--------------------------|----------|----------|
+| `boto3`                  | 1.12.9   | 1.12.49  |
+| `botocore`               | 1.15.9   | 1.15.49  |
+| `jmespath`               | 0.9.4    | 0.9.5    |
+| `python-dateutil`        | 2.8.1    | 2.8.2    |
+| `s3transfer`             | 0.3.0    | 0.3.7    |
+| `urllib3`                | 1.25.8   | 1.25.11  |
 
 ## [1.5.6] - 2023-07-11
 ### Changed
