@@ -58,9 +58,9 @@ docker build -t ims-kiwi-ng-opensuse-x86_64-builder:dev .
    above as volumes. This step will take a while and depending on the image
    recipe will consume considerable memory and disk space.
 ```
-# docker run --privileged=true --rm -v /path/to/recipe:/mnt/recipe -v /path/to/build-root:/mnt/image ims-kiwi-ng-opensuse-x86_64-builder:dev
+# docker run --privileged=true --rm -v /path/to/recipe:/mnt/image/recipe -v /path/to/build-root:/mnt/image ims-kiwi-ng-opensuse-x86_64-builder:dev
 [ INFO    ]: 22:02:20 | Loading XML description
-[ INFO    ]: 22:02:20 | --> loaded /mnt/recipe/config.xml
+[ INFO    ]: 22:02:20 | --> loaded /mnt/image/recipe/config.xml
 [ INFO    ]: 22:02:20 | --> Selected build type: oem
 [ INFO    ]: 22:02:20 | Preparing new root system
 [ INFO    ]: 22:02:20 | Setup root directory: /mnt/build-root/build/image-root
