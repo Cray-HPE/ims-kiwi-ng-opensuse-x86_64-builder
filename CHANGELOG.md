@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Disabled concurrent Jenkins builds on same branch/commit
 - Added build timeout to avoid hung builds
+- CASMCMS-8801 - changed the image volume mounts to ude PVC's instead of ephemeral storage.
 
 ### Dependencies
 - CASMCMS-8722: Use `update_external_versions` to get latest patch version of `ims-python-helper` Python module.
