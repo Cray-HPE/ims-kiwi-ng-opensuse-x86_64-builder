@@ -78,6 +78,7 @@ echo "Calling kiwi-ng build..."
 kiwi-ng \
     $DEBUG_FLAGS \
     --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
+    --target-arch=$BUILD_ARCH \
     --type tbz system build \
     --description $RECIPE_ROOT_PARENT \
     --target $IMAGE_ROOT_PARENT \
