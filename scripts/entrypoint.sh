@@ -66,6 +66,9 @@ function run_emulation_build() {
 
     # run the arm64 kiwi build inside this new pod
     podman --storage-driver=vfs pull --platform linux/arm64 docker://registry.local/$IMS_ARM_BUILDER
+
+    # NOTE: if we can get --cpu-rt-runtime=950000 to work in the below command, it will 
+    #  allow the process to use up much more of the CPU. Currently get 'cpu feature not supported' error.
     podman --storage-driver=vfs run  --privileged --platform linux/arm64 --entrypoint "/scripts/armentry.sh" -e BUILD_ARCH=$BUILD_ARCH -v /signing-keys:/signing-keys -v /mnt/image/recipe/:/mnt/image/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm  docker://registry.local/$IMS_ARM_BUILDER
 }
 
@@ -77,7 +80,7 @@ function run_remote_build() {
     echo BUILD_ARCH=${BUILD_ARCH} >> /env.sh
     echo IMS_JOB_ID=${IMS_JOB_ID} >> /env.sh
     echo IMAGE_ROOT_PARENT=${IMAGE_ROOT_PARENT} >> /env.sh
-    echo RECIPE_ROOT_PARENT=/data/recipe >> env.sh
+    echo RECIPE_ROOT_PARENT=/data/recipe >> /env.sh
 
     # Modify the dockerfile to use the correct base image
     (echo "cat <<EOF" ; cat Dockerfile.remote ; echo EOF ) | sh > Dockerfile
