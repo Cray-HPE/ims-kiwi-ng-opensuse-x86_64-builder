@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2023-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -28,15 +28,11 @@
 set -x
 echo on
 
-# pull in custom vars from the image
-# NOTE: this should be constructed by the script building the image
-source /data/env.sh
-
 # check the contents of the imported env vars
 IMPORTED_VALS=('OAUTH_CONFIG_DIR' 'BUILD_ARCH' 'IMS_JOB_ID' 'IMAGE_ROOT_PARENT' 'RECIPE_ROOT_PARENT')
 for item in "${IMPORTED_VALS[@]}"; do
   if [[ -z "${!item}" ]]; then
-    echo ERROR: $item not set in env.sh
+    echo ERROR: $item not set in Environment
     exit 1
   fi
 done

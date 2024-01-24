@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2023-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -30,8 +30,14 @@ COPY /mnt/ca-rpm/cray_ca_cert-1.0.1-1.noarch.rpm /data/ca-rpm/cray_ca_cert-1.0.1
 COPY /etc/cray/ca/certificate_authority.crt /etc/cray/ca/certificate_authority.crt
 COPY /etc/admin-client-auth /etc/admin-client-auth
 
+# set env variables
+ENV OAUTH_CONFIG_DIR=$OAUTH_CONFIG_DIR
+ENV BUILD_ARCH=$BUILD_ARCH
+ENV IMS_JOB_ID=$IMS_JOB_ID
+ENV IMAGE_ROOT_PARENT=$IMAGE_ROOT_PARENT
+ENV RECIPE_ROOT_PARENT=/data/recipe
+
 # Copy in the recipe
 COPY /mnt/image/recipe/. /data/recipe
-COPY env.sh /data/env.sh
 
-ENTRYPOINT ["/scripts/remote_entrypoint.sh"]
+ENTRYPOINT ["/scripts/remote_build_entrypoint.sh"]
