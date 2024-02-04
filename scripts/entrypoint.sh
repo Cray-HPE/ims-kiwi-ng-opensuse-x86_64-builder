@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2019, 2021-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2019, 2021-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -75,12 +75,15 @@ function run_emulation_build() {
 function run_remote_build() {
     echo "Running remote build on host: $REMOTE_BUILD_NODE"
 
-    # load up env file for image
-    echo export OAUTH_CONFIG_DIR=${OAUTH_CONFIG_DIR} > /env.sh
-    echo BUILD_ARCH=${BUILD_ARCH} >> /env.sh
-    echo IMS_JOB_ID=${IMS_JOB_ID} >> /env.sh
-    echo IMAGE_ROOT_PARENT=${IMAGE_ROOT_PARENT} >> /env.sh
-    echo RECIPE_ROOT_PARENT=/data/recipe >> /env.sh
+    # Set up the ssh keys for access to the remote node
+    mkdir -p ~/.ssh
+    cp /etc/cray/remote-keys/id_ecdsa ~/.ssh
+    chmod 600 ~/.ssh/id_ecdsa
+    ssh-keygen -y -f ~/.ssh/id_ecdsa > ~/.ssh/id_ecdsa.pub
+
+    # NOTE - presence of the dir in /tmp on the remote node it used to signal a running job
+    #   make sure this gets cleaned up on exit
+    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "mkdir -p /tmp/ims_${IMS_JOB_ID}/"
 
     # Modify the dockerfile to use the correct base image
     (echo "cat <<EOF" ; cat Dockerfile.remote ; echo EOF ) | sh > Dockerfile
@@ -89,14 +92,14 @@ function run_remote_build() {
     podman build -t ims-remote-${IMS_JOB_ID}:1.0.0 .
 
     # Copy docker image to remote node
-    podman save ims-remote-${IMS_JOB_ID}:1.0.0 | ssh root@${REMOTE_BUILD_NODE} podman load
+    podman save ims-remote-${IMS_JOB_ID}:1.0.0 | ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} podman load
 
     # remote run of the docker image
     ## NOTE: do not use '-rm' tag as we want access to the results
-    ssh root@${REMOTE_BUILD_NODE} "podman run --name ims-${IMS_JOB_ID} --privileged -t -i ims-remote-${IMS_JOB_ID}:1.0.0"
+    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman run --name ims-${IMS_JOB_ID} --privileged -t -i ims-remote-${IMS_JOB_ID}:1.0.0"
 
     # check the results of the build
-    ssh root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/build_failed /tmp"
+    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/build_succeeded /tmp/ims_${IMS_JOB_ID}/"
     rc=$?
     if [ "$rc" -ne "0" ]; then
         # Failed rc indicates file not present
@@ -105,29 +108,28 @@ function run_remote_build() {
     else
         # copy image files from pod to remote machine
         ## NOTE - need to copy to /tmp - VERY limited for space...
-        ssh root@${REMOTE_BUILD_NODE} "mkdir -p /tmp/${IMS_JOB_ID}/"
-        ssh root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/transfer.sqsh /tmp/${IMS_JOB_ID}/"
-        ssh root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/kiwi.log /tmp/${IMS_JOB_ID}/"
+        ## NOTE - is there a way to do this straight from remote container to this pod without the imtermediate copy??? 
+        ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/transfer.sqsh /tmp/ims_${IMS_JOB_ID}/"
+        ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/kiwi.log /tmp/ims_${IMS_JOB_ID}/"
 
         # copy image files from remote machine to job pod
-        scp root@${REMOTE_BUILD_NODE}:/tmp/${IMS_JOB_ID}/* ${IMAGE_ROOT_PARENT}
+        scp -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE}:/tmp/ims_${IMS_JOB_ID}/* ${IMAGE_ROOT_PARENT}
 
         # delete build files from remote host
-        ssh root@${REMOTE_BUILD_NODE} "rm -rf /tmp/${IMS_JOB_ID}/"
+        ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "rm -rf /tmp/ims_${IMS_JOB_ID}/"
 
         # unpack squashfs
         mkdir -p ${IMAGE_ROOT_PARENT}/build
         unsquashfs -f -d ${IMAGE_ROOT_PARENT}/build/image-root ${IMAGE_ROOT_PARENT}/transfer.sqsh
         rm ${IMAGE_ROOT_PARENT}/transfer.sqsh
-        touch $PARAMETER_FILE_BUILD_SUCCEEDED
     fi
 
     # delete artifacts off of remote host
     # NOTE: need to prune the anonymous volume explicitly to free up the space
-    ssh root@${REMOTE_BUILD_NODE} "rm -rf /tmp/${IMS_JOB_ID}/"
-    ssh root@${REMOTE_BUILD_NODE} "podman rm ims-${IMS_JOB_ID}"
-    ssh root@${REMOTE_BUILD_NODE} "podman rmi ims-remote-${IMS_JOB_ID}:1.0.0"
-    ssh root@${REMOTE_BUILD_NODE} "podman volume prune -f"
+    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "rm -rf /tmp/ims_${IMS_JOB_ID}/"
+    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman rm ims-${IMS_JOB_ID}"
+    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman rmi ims-remote-${IMS_JOB_ID}:1.0.0"
+    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman volume prune -f"
 }
 
 function run_local_build() {
