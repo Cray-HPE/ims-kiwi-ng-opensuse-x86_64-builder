@@ -75,6 +75,12 @@ function run_emulation_build() {
 function run_remote_build() {
     echo "Running remote build on host: $REMOTE_BUILD_NODE"
 
+    # set the arch on this job
+    PODMAN_ARCH="linux/amd64"
+    if [ "$BUILD_ARCH" == "aarch64" ]; then
+        PODMAN_ARCH="linux/arm64"
+    fi
+
     # Set up the ssh keys for access to the remote node
     mkdir -p ~/.ssh
     cp /etc/cray/remote-keys/id_ecdsa ~/.ssh
@@ -89,7 +95,7 @@ function run_remote_build() {
     (echo "cat <<EOF" ; cat Dockerfile.remote ; echo EOF ) | sh > Dockerfile
 
     # build the docker image
-    podman build -t ims-remote-${IMS_JOB_ID}:1.0.0 .
+    podman build --platform ${PODMAN_ARCH} -t ims-remote-${IMS_JOB_ID}:1.0.0 .
 
     # Copy docker image to remote node
     podman save ims-remote-${IMS_JOB_ID}:1.0.0 | ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} podman load
