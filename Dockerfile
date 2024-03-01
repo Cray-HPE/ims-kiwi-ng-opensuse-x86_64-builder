@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2018, 2021-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2018, 2021-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -25,7 +25,7 @@
 FROM artifactory.algol60.net/csm-docker/stable/docker.io/opensuse/leap:15.4 as base
 
 COPY requirements.txt constraints.txt /
-RUN zypper in -y python3-pip python3-kiwi xz jing curl podman kmod make wget
+RUN zypper in -y python3-pip python3-kiwi xz jing curl podman kmod make wget openssh squashfs vi gzip
 
 # Install qemu-aarch64-static binary to handle arm64 emulation if needed
 RUN wget https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static && \
@@ -44,6 +44,6 @@ VOLUME /mnt/image
 RUN mkdir -p /scripts /signing-keys /mnt/image/recipe
 COPY signing-keys/HPE-SHASTA-RPM-PROD.asc /signing-keys
 COPY signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc /signing-keys
-COPY entrypoint.sh /scripts/entrypoint.sh
-COPY armentry.sh /scripts/armentry.sh
+COPY scripts/. /scripts
+COPY Dockerfile.remote /Dockerfile.remote
 ENTRYPOINT ["/scripts/entrypoint.sh"]

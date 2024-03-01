@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2024-03-01
+### Changed
+- CASMCMS-8795 - Updated for remote builds.
+- CASMCMS-8818 - ssh key injection into jobs.
+- CASMCMS-8897 - changes for aarch64 remote build.
+
 ## [1.6.0] - 2023-09-15
 ### Changed
 - Disabled concurrent Jenkins builds on same branch/commit

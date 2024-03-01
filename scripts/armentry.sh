@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2019, 2021-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -22,9 +22,12 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 #
+
+# NOTE: this script is run inside an aarch64 podman container under emulation
+#       inside the k8s job.
+
 set -x
 
-echo on
 RECIPE_ROOT_PARENT=${1:-/mnt/image/recipe}
 IMAGE_ROOT_PARENT=${2:-/mnt/image}
 PARAMETER_FILE_BUILD_FAILED=$IMAGE_ROOT_PARENT/build_failed
@@ -46,59 +49,11 @@ if [[ ! $RC ]]; then
 	exit 1
 fi
 
-echo "Setting ims job status to building_image"
-python3 -m ims_python_helper image set_job_status $IMS_JOB_ID building_image
-
-DEBUG_FLAGS=""
-if [[ `echo $ENABLE_DEBUG | tr [:upper:] [:lower:]` = "true" ]]; then
-    DEBUG_FLAGS="--debug"
-fi
-
-# If this is running an arm64 emulation we need to set up the emulator, then
-# run the arm64 version of the ims-kiwi-build image.
-echo "Checking build architecture: $BUILD_ARCH"
-if [ "$BUILD_ARCH" == "aarch64" ]; then
-    echo "Build architecture is aarch64"
-    # Regiser qemu-aarch64-static to act as an arm interpreter for arm builds 
-    if [ ! -d /proc/sys/fs/binfmt_misc ] ; then
-        echo "- binfmt_misc does not appear to be loaded or isn't built in."
-        echo "  Trying to load it..."
-        if ! modprobe binfmt_misc ; then
-            echo "FATAL: Unable to load binfmt_misc"
-            exit 1;
-        fi
-    fi
-
-    # mount the emulation filesystem
-    if [ ! -f /proc/sys/fs/binfmt_misc/register ] ; then
-        echo "- The binfmt_misc filesystem does not appear to be mounted."
-        echo "  Trying to mount it..."
-        if ! mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc ; then
-            echo "FATAL:  Unable to mount binfmt_misc filesystem."
-            exit 1
-        fi
-    fi
-
-    # register qemu for aarch64 images 
-    if [ ! -f /proc/sys/fs/binfmt_misc/qemu-aarch64 ] ; then
-        echo "- Setting up QEMU for ARM64"
-        echo ":qemu-aarch64:M::\x7f\x45\x4c\x46\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-static:F" >> /proc/sys/fs/binfmt_misc/register
-    fi
-
-    # Remove podman references to overlayfs to utilize vfs instead
-    rm -rf /var/lib/containers/
-
-    # run the arm64 kiwi build inside this new pod
-    podman --storage-driver=vfs pull --platform linux/arm64 docker://registry.local/$IMS_ARM_BUILDER
-    podman --storage-driver=vfs run  --privileged --platform linux/arm64 --entrypoint "/scripts/armentry.sh" -e BUILD_ARCH=$BUILD_ARCH -v /signing-keys:/signing-keys -v /mnt/image/recipe/:/mnt/image/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm  docker://registry.local/$IMS_ARM_BUILDER
-    exit 0
-fi
-
 # Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
 # causes kiwi to install the cray-ca-cert rpm into the image root.
-echo "Calling kiwi-ng build..."
 kiwi-ng \
     $DEBUG_FLAGS \
+    --target-arch=$BUILD_ARCH \
     --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
     --type tbz system build \
     --description $RECIPE_ROOT_PARENT \
@@ -110,6 +65,8 @@ rc=$?
 
 if [ "$rc" -ne "0" ]; then
   echo "ERROR: Kiwi reported a build error."
+  echo "Outputting kiwi log file."
+  cat $PARAMETER_FILE_KIWI_LOGFILE
   touch $PARAMETER_FILE_BUILD_FAILED
 fi
 
