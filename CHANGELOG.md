@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- CASMCMS-8795 - Updated for remote builds.
+- CASMCMS-8818 - ssh key injection into jobs.
+- CASMCMS-8897 - changes for aarch64 remote build.
 
 ## [1.6.0] - 2023-09-15
 ### Changed
