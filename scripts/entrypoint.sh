@@ -101,7 +101,8 @@ function run_remote_build() {
     podman save ims-remote-${IMS_JOB_ID}:1.0.0 | ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} podman load
 
     # set up clean exit if something happens to job while the remote container is executing
-    trap clean_exit SIGTERM SIGABRT SIGQUIT
+    trap "echo TERM; clean_exit" SIGTERM
+    trap "echo INT; clean_exit" SIGINT
 
     # remote run of the docker image
     ## NOTE: do not use '-rm' tag as we want access to the results

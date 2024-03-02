@@ -69,7 +69,8 @@ if [[ `echo $ENABLE_DEBUG | tr [:upper:] [:lower:]` = "true" ]]; then
 fi
 
 # handle abrupt exit quickly
-trap "echo Terminating from signal; exit 1" SIGTERM SIGABRT SIGQUIT
+trap "echo Terminating from SIGTERM signal; exit 1" SIGTERM SIGINT
+trap "echo Terminating from SIGINT signal; exit 1" SIGINT
 
 # Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
 # causes kiwi to install the cray-ca-cert rpm into the image root.
