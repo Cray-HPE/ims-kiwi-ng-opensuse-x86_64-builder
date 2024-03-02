@@ -68,6 +68,9 @@ if [[ `echo $ENABLE_DEBUG | tr [:upper:] [:lower:]` = "true" ]]; then
     DEBUG_FLAGS="--debug"
 fi
 
+# handle abrupt exit quickly
+trap "echo Terminating from signal; exit 1" SIGTERM SIGABRT SIGQUIT
+
 # Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
 # causes kiwi to install the cray-ca-cert rpm into the image root.
 echo "Calling kiwi-ng build..."

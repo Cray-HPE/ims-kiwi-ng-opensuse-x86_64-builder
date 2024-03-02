@@ -100,6 +100,9 @@ function run_remote_build() {
     # Copy docker image to remote node
     podman save ims-remote-${IMS_JOB_ID}:1.0.0 | ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} podman load
 
+    # set up clean exit if something happens to job while the remote container is executing
+    trap clean_exit SIGTERM SIGABRT SIGQUIT
+
     # remote run of the docker image
     ## NOTE: do not use '-rm' tag as we want access to the results
     ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman run --name ims-${IMS_JOB_ID} --privileged -t -i ims-remote-${IMS_JOB_ID}:1.0.0"
@@ -130,7 +133,25 @@ function run_remote_build() {
         rm ${IMAGE_ROOT_PARENT}/transfer.sqsh
     fi
 
-    # delete artifacts off of remote host
+    # make sure all artifacts are cleaned up
+    clean_remote_node
+}
+
+function clean_exit {
+    # handle an unexpected exit cleanly
+    echo "Abrubt exiting..."
+
+    # remote container will still be running - need to terminate it
+    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman stop ims-${IMS_JOB_ID}"
+
+    # now a normal cleanup can proceed
+    clean_remote_node
+
+    exit 1
+}
+
+function clean_remote_node {
+    # clean up the artifacts from the remote build node
     # NOTE: need to prune the anonymous volume explicitly to free up the space
     ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "rm -rf /tmp/ims_${IMS_JOB_ID}/"
     ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman rm ims-${IMS_JOB_ID}"
