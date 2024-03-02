@@ -75,7 +75,7 @@ trap "echo Terminating from SIGINT signal; exit 1" SIGINT
 # Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
 # causes kiwi to install the cray-ca-cert rpm into the image root.
 echo "Calling kiwi-ng build..."
-kiwi-ng \
+exec kiwi-ng \
     $DEBUG_FLAGS \
     --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
     --target-arch=$BUILD_ARCH \
