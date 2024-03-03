@@ -106,7 +106,11 @@ function run_remote_build() {
 
     # remote run of the docker image
     ## NOTE: do not use '-rm' tag as we want access to the results
-    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman run --name ims-${IMS_JOB_ID} --privileged -t -i ims-remote-${IMS_JOB_ID}:1.0.0"
+    ## NOTE: detach to allow interrupt
+    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman run --name ims-${IMS_JOB_ID} --privileged -detach ims-remote-${IMS_JOB_ID}:1.0.0"
+
+    # follow the log to stream to this log
+    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman log --follow ims-${IMS_JOB_ID}"
 
     # check the results of the build
     ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/build_succeeded /tmp/ims_${IMS_JOB_ID}/"
