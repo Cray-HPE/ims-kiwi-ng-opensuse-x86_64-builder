@@ -150,6 +150,7 @@ function run_local_build() {
         --target $IMAGE_ROOT_PARENT \
         --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.noarch.rpm \
         --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
+        --signing-key /signing-keys/HPE-SHASTA-RPM-PROD-FIPS.public \
         --signing-key /signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc
     rc=$?
 

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2024-05-20
+### Added
+- CASMCMS-8976 - add new DST signing key to recipe build process.
+
 ## [1.7.0] - 2024-03-01
 ### Changed
 - CASMCMS-8795 - Updated for remote builds.
