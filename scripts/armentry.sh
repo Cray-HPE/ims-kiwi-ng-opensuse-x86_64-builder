@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2023-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -60,6 +60,7 @@ kiwi-ng \
     --target $IMAGE_ROOT_PARENT \
     --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.noarch.rpm \
     --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
+    --signing-key /signing-keys/HPE-SHASTA-RPM-PROD-FIPS.public \
     --signing-key /signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc
 rc=$?
 

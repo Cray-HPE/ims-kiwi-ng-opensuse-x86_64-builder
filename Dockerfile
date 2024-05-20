@@ -43,6 +43,7 @@ VOLUME /mnt/image
 
 RUN mkdir -p /scripts /signing-keys /mnt/image/recipe
 COPY signing-keys/HPE-SHASTA-RPM-PROD.asc /signing-keys
+COPY signing-keys/HPE-SHASTA-RPM-PROD-FIPS.public /signing-keys
 COPY signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc /signing-keys
 COPY scripts/. /scripts
 COPY Dockerfile.remote /Dockerfile.remote
