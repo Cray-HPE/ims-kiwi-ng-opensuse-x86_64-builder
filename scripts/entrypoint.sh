@@ -177,7 +177,7 @@ if [[ ! $RC ]]; then
 fi
 
 echo "Setting ims job status to building_image"
-python3 -m ims_python_helper image set_job_status $IMS_JOB_ID building_image
+python3.11 -m ims_python_helper image set_job_status $IMS_JOB_ID building_image
 
 DEBUG_FLAGS=""
 if [[ `echo $ENABLE_DEBUG | tr [:upper:] [:lower:]` = "true" ]]; then
