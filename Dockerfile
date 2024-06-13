@@ -35,6 +35,7 @@ RUN wget https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-
 COPY zypper-refresh-patch-clean.sh /
 RUN /zypper-refresh-patch-clean.sh && rm /zypper-refresh-patch-clean.sh
 
+RUN python3 --version
 RUN pip3 install --upgrade pip
 RUN --mount=type=secret,id=netrc,target=/root/.netrc \
     pip3 install --no-cache-dir -r requirements.txt
