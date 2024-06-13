@@ -36,11 +36,11 @@ COPY zypper-refresh-patch-clean.sh /
 RUN /zypper-refresh-patch-clean.sh && rm /zypper-refresh-patch-clean.sh
 
 RUN python3 --version
-RUN python3 --version
+RUN python3.10 --version
 
 RUN pip3 install --upgrade pip
 RUN --mount=type=secret,id=netrc,target=/root/.netrc \
-    python3.11 -m pip install --no-cache-dir -r requirements.txt
+    python3.10 -m pip install --no-cache-dir -r requirements.txt
 
 #RUN pip3 install --upgrade pip
 #RUN --mount=type=secret,id=netrc,target=/root/.netrc \
