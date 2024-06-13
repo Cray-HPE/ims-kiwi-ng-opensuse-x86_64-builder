@@ -40,7 +40,7 @@ RUN python3 --version
 
 RUN pip3 install --upgrade pip
 RUN --mount=type=secret,id=netrc,target=/root/.netrc \
-    python3.11 -m pip3 install --no-cache-dir -r requirements.txt
+    python3.11 -m pip install --no-cache-dir -r requirements.txt
 
 #RUN pip3 install --upgrade pip
 #RUN --mount=type=secret,id=netrc,target=/root/.netrc \
