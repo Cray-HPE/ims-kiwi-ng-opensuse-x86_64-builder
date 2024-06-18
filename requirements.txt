@@ -1,6 +1,6 @@
 # Only use Cray-procured packages
 --trusted-host artifactory.algol60.net
---extra-index-url http://artifactory.algol60.net/artifactory/csm-python-modules/unstable
+--extra-index-url http://artifactory.algol60.net/artifactory/csm-python-modules/simple
 -c constraints.txt
 
 ims-python-helper
