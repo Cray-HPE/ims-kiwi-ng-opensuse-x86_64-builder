@@ -36,7 +36,7 @@ COPY zypper-refresh-patch-clean.sh /
 RUN /zypper-refresh-patch-clean.sh && rm /zypper-refresh-patch-clean.sh
 
 RUN python3 --version
-RUN ls /usr/local/bin | grep python
+RUN ls /usr/bin | grep python
 
 RUN pip3 install --upgrade pip
 RUN --mount=type=secret,id=netrc,target=/root/.netrc \
