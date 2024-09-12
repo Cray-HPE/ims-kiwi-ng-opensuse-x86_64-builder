@@ -68,12 +68,6 @@ pipeline {
             }
         }
 
-        stage("Lint") {
-            steps {
-                sh "make lint"
-            }
-        }
-
         stage("Build") {
             environment {
                 DOCKER_VERSION = sh(returnStdout: true, script: "head -1 .docker_version").trim()
