@@ -33,8 +33,9 @@ RUN wget https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-
 
 # Apply security patches
 COPY zypper-refresh-patch-clean.sh /
-RUN /zypper-refresh-patch-clean.sh && rm /zypper-refresh-patch-clean.sh && rpm -q | grep -Ei 'invoke|cni|containernet|xalan || true
-RUN find / -type f \( -iname invoke\* -o -iname \*cni\* -o -iname \*containernet\* -o -iname \*xalan\* \) -print 2>/dev/null && exit 1
+RUN /zypper-refresh-patch-clean.sh && rm /zypper-refresh-patch-clean.sh && rpm -q | grep -Ei 'invoke|cni|containernet|xalan' || true
+RUN zypper --non-interactive search xalan-j2 || true
+RUN find / -type f \( -iname invoke\* -o -iname \*cni\* -o -iname \*containernet\* \) -print 2>/dev/null && exit 1
 
 RUN pip3 install --upgrade pip
 RUN --mount=type=secret,id=netrc,target=/root/.netrc \
