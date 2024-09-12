@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Dependencies
+- Resolves CVEs
+  - Moved Docker base image from OpenSUSE 15.4 to 15.6
+  - Updated `xalan-j2` package to >= 2.7.3
 
 ## [1.8.1] - 2024-07-25
 ### Dependencies
