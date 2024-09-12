@@ -34,7 +34,11 @@ RUN wget https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-
 # Apply security patches
 COPY zypper-refresh-patch-clean.sh /
 RUN /zypper-refresh-patch-clean.sh && rm /zypper-refresh-patch-clean.sh && rpm -ql | grep -Ei 'xalan' || true
-RUN zypper --non-interactive search -s xalan-j2 && exit 1
+RUN zypper --non-interactive search -s xalan-j2 || true
+RUN zypper --non-interactive ar http://download.opensuse.org/tumbleweed/repo/oss/ tumbleweed
+RUN zypper --non-interactive search -s xalan-j2 || true
+RUN zypper --non-interactive in -y 'xalan-j2>=2.7.3'
+
 
 RUN pip3 install --upgrade pip
 RUN --mount=type=secret,id=netrc,target=/root/.netrc \
