@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.2] - 2024-09-12
+### Dependencies
+- Resolves CVEs
+  - Moved Docker base image from OpenSUSE 15.4 to 15.6
+  - Updated `xalan-j2` package to >= 2.7.3
+
 ## [1.8.1] - 2024-07-25
 ### Dependencies
 - Bumped `certifi` from 2019.11.28 to 2023.7.22 to resolve CVE
