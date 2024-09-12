@@ -24,19 +24,23 @@
 # Cray Image Management Service image build environment Dockerfile
 FROM artifactory.algol60.net/csm-docker/stable/docker.io/opensuse/leap:15.6 as base
 
-COPY requirements.txt constraints.txt /
-RUN zypper in -y python3-pip python3-kiwi xz jing curl podman kmod make wget openssh squashfs vi gzip
-
-# Install qemu-aarch64-static binary to handle arm64 emulation if needed
-RUN wget https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static && \
-    mv ./qemu-aarch64-static /usr/bin/qemu-aarch64-static && chmod +x /usr/bin/qemu-aarch64-static
-
-# Apply security patches
-COPY zypper-refresh-patch-clean.sh /
-RUN /zypper-refresh-patch-clean.sh && rm /zypper-refresh-patch-clean.sh
-
-RUN pip3 install --upgrade pip
+COPY requirements.txt constraints.txt zypper-refresh-patch-clean.sh /
+# 1. Install qemu-aarch64-static binary to handle arm64 emulation if needed
+# 2. Update xalan-j2 package to avoid CVE. Currently we have to add a repo to get it.
+# 3. Apply security patches
+# 4. Install Python
 RUN --mount=type=secret,id=netrc,target=/root/.netrc \
+    zypper in -y python3-pip python3-kiwi xz jing curl podman kmod make wget openssh squashfs vi gzip && \
+    wget https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static && \
+    mv ./qemu-aarch64-static /usr/bin/qemu-aarch64-static && \
+    chmod +x /usr/bin/qemu-aarch64-static && \
+    zypper --non-interactive ar http://download.opensuse.org/tumbleweed/repo/oss/ tumbleweed && \
+    zypper --non-interactive refresh && \
+    zypper --non-interactive in -y 'xalan-j2>=2.7.3' && \
+    zypper --non-interactive rr tumbleweed && \
+    /zypper-refresh-patch-clean.sh && \
+    rm /zypper-refresh-patch-clean.sh && \
+    pip3 install --upgrade pip && \
     pip3 install --no-cache-dir -r requirements.txt
 
 VOLUME /mnt/image
