@@ -25,13 +25,11 @@
 FROM artifactory.algol60.net/csm-docker/stable/docker.io/opensuse/leap:15.6 as base
 
 # Create a user with UID 65534 and GID 65534 (nobody user)
-RUN useradd -u 65534 -g 65534 -ms /bin/bash nobody
+RUN groupadd --gid 65534 nobody || true && \
+    useradd -u 65534 -g 65534 -ms /bin/bash nobody
 
 # Add privilege into sudoers file
 RUN echo 'nobody ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
-
-# Switch the user to non-root
-USER 65534:65534
 
 COPY requirements.txt constraints.txt zypper-refresh-patch-clean.sh /
 # 1. Install qemu-aarch64-static binary to handle arm64 emulation if needed
@@ -61,4 +59,8 @@ COPY signing-keys/HPE-SHASTA-RPM-PROD-FIPS.public /signing-keys
 COPY signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc /signing-keys
 COPY scripts/. /scripts
 COPY Dockerfile.remote /Dockerfile.remote
+
+# Switch the user to non-root
+USER 65534:65534
+
 ENTRYPOINT ["/scripts/entrypoint.sh"]
