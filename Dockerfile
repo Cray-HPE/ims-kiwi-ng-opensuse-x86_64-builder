@@ -24,6 +24,15 @@
 # Cray Image Management Service image build environment Dockerfile
 FROM artifactory.algol60.net/csm-docker/stable/docker.io/opensuse/leap:15.6 as base
 
+# Create a user with UID 65534 and GID 65534 (nobody user)
+RUN useradd -u 65534 -g 65534 -ms /bin/bash nobody
+
+# Add privilege into sudoers file
+RUN echo 'nobody ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# Switch the user to non-root
+USER 65534:65534
+
 COPY requirements.txt constraints.txt zypper-refresh-patch-clean.sh /
 # 1. Install qemu-aarch64-static binary to handle arm64 emulation if needed
 # 2. Update xalan-j2 package to avoid CVE. Currently we have to add a repo to get it.
