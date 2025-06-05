@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2019, 2021-2024 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2019, 2021-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -32,6 +32,10 @@ RECIPE_ROOT_PARENT=${1:-/mnt/image/recipe}
 IMAGE_ROOT_PARENT=${2:-/mnt/image}
 PARAMETER_FILE_BUILD_FAILED=$IMAGE_ROOT_PARENT/build_failed
 PARAMETER_FILE_KIWI_LOGFILE=$IMAGE_ROOT_PARENT/kiwi.log
+SSH_CONNECTION_TIMEOUT_SECONDS=300
+SSH_SERVER_ALIVE_INTERVAL_SECONDS=10
+SSH_SERVER_ALIVE_COUNT=30
+
 
 function run_emulation_build() {
     echo "Build architecture is $BUILD_ARCH - running under emulation"
@@ -89,8 +93,12 @@ function run_remote_build() {
 
     # NOTE - presence of the dir in /tmp on the remote node it used to signal a running job
     #   make sure this gets cleaned up on exit
-    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "mkdir -p /tmp/ims_${IMS_JOB_ID}/"
-
+    ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "mkdir -p /tmp/ims_${IMS_JOB_ID}/"
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to create directory /tmp/ims_${IMS_JOB_ID} on remote node $REMOTE_BUILD_NODE."
+        touch $PARAMETER_FILE_BUILD_FAILED
+        exit 0
+    fi
     # Modify the dockerfile to use the correct base image
     (echo "cat <<EOF" ; cat Dockerfile.remote ; echo EOF ) | sh > Dockerfile
 
@@ -98,44 +106,64 @@ function run_remote_build() {
     podman build --platform ${PODMAN_ARCH} -t ims-remote-${IMS_JOB_ID}:1.0.0 .
 
     # Copy docker image to remote node
-    podman save ims-remote-${IMS_JOB_ID}:1.0.0 | ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} podman load
+    podman save ims-remote-${IMS_JOB_ID}:1.0.0 | ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} podman load
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to copy docker image to remote node $REMOTE_BUILD_NODE."
+        touch $PARAMETER_FILE_BUILD_FAILED
+        exit 0
+    fi
 
     # remote run of the docker image
     ## NOTE: do not use '-rm' tag as we want access to the results
-    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman run --name ims-${IMS_JOB_ID} --privileged -t -i ims-remote-${IMS_JOB_ID}:1.0.0"
+    ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman run --name ims-${IMS_JOB_ID} --privileged -t -i ims-remote-${IMS_JOB_ID}:1.0.0"
+    brc=$?
+    if [ "$brc" -ne "255" ] && [ "$brc" -ne "0" ]; then
+        echo "ERROR: Kiwi build failed on remote host."
+        # Not exiting here to perform the cleanup of the remote host
+    fi
 
     # check the results of the build
-    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/build_succeeded /tmp/ims_${IMS_JOB_ID}/"
+    ssh -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o StrictHostKeyChecking=no -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/build_succeeded /tmp/ims_${IMS_JOB_ID}/"
     rc=$?
     if [ "$rc" -ne "0" ]; then
+        # If the build failed, we will not have a build_succeeded file
         # Failed rc indicates file not present
-        echo "ERROR: Kiwi reported a build error."
         touch $PARAMETER_FILE_BUILD_FAILED
     else
         # copy image files from pod to remote machine
         ## NOTE - need to copy to /tmp - VERY limited for space...
         ## NOTE - is there a way to do this straight from remote container to this pod without the imtermediate copy??? 
-        ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/transfer.sqsh /tmp/ims_${IMS_JOB_ID}/"
-        ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/kiwi.log /tmp/ims_${IMS_JOB_ID}/"
+        ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/transfer.sqsh /tmp/ims_${IMS_JOB_ID}/"
+        rc_sqsh=$?
+        ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/kiwi.log /tmp/ims_${IMS_JOB_ID}/"
 
-        # copy image files from remote machine to job pod
-        scp -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE}:/tmp/ims_${IMS_JOB_ID}/* ${IMAGE_ROOT_PARENT}
+        if [ "$rc_sqsh" -eq "0" ]; then
+            # copy image files from remote machine to job pod
+            scp -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE}:/tmp/ims_${IMS_JOB_ID}/* ${IMAGE_ROOT_PARENT}
 
-        # delete build files from remote host
-        ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "rm -rf /tmp/ims_${IMS_JOB_ID}/"
+            # delete build files from remote host
+            ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "rm -rf /tmp/ims_${IMS_JOB_ID}/"
 
-        # unpack squashfs
-        mkdir -p ${IMAGE_ROOT_PARENT}/build
-        unsquashfs -f -d ${IMAGE_ROOT_PARENT}/build/image-root ${IMAGE_ROOT_PARENT}/transfer.sqsh
-        rm ${IMAGE_ROOT_PARENT}/transfer.sqsh
+            # unpack squashfs
+            mkdir -p ${IMAGE_ROOT_PARENT}/build
+            unsquashfs -f -d ${IMAGE_ROOT_PARENT}/build/image-root ${IMAGE_ROOT_PARENT}/transfer.sqsh
+            rm ${IMAGE_ROOT_PARENT}/transfer.sqsh
+        else
+            echo "ERROR: Failed to copy image files from pod to remote host."
+            touch $PARAMETER_FILE_BUILD_FAILED
+        fi
     fi
 
     # delete artifacts off of remote host
     # NOTE: need to prune the anonymous volume explicitly to free up the space
-    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "rm -rf /tmp/ims_${IMS_JOB_ID}/"
-    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman rm ims-${IMS_JOB_ID}"
-    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman rmi ims-remote-${IMS_JOB_ID}:1.0.0"
-    ssh -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE} "podman volume prune -f"
+    # rc=255 Connection failed, authentication failure, host unreachable, or timeout. In that case we should not perform any remote cleanup as ssh connection is not possible
+    if [ "$rc" -ne "255" ]; then
+      ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "rm -rf /tmp/ims_${IMS_JOB_ID}/"
+      ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman rm ims-${IMS_JOB_ID}"
+      ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman rmi ims-remote-${IMS_JOB_ID}:1.0.0"
+      ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman volume prune -f"
+      echo "Cleanup complete on remote host"
+    fi
 }
 
 function run_local_build() {
