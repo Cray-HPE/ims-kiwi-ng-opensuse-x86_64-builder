@@ -129,7 +129,7 @@ function run_remote_build() {
     if [ "$rc" -ne "0" ]; then
         # If the build failed, we will not have a build_succeeded file
         # Failed rc indicates file not present
-        echo "ERROR: Kiwi build failed on remote host - no build_succeeded file found."
+        echo "ERROR: Kiwi build failed on remote host."
         touch $PARAMETER_FILE_BUILD_FAILED
     else
         # copy image files from pod to remote machine
