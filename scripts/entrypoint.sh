@@ -117,9 +117,10 @@ function run_remote_build() {
     ## NOTE: do not use '-rm' tag as we want access to the results
     ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman run --name ims-${IMS_JOB_ID} --privileged -t -i ims-remote-${IMS_JOB_ID}:1.0.0"
     brc=$?
-    if [ "$brc" -ne "255" ] && [ "$brc" -ne "0" ]; then
-        echo "ERROR: Kiwi build failed on remote host."
-        # Not exiting here to perform the cleanup of the remote host
+    if [ "$brc" -eq "255" ]; then
+        echo "ERROR: ssh connection failed to remote host."
+    elif [ "$brc" -ne "0" ]; then
+        echo "ERROR: Kiwi build failed on remote host with return code: $brc"
     fi
 
     # check the results of the build
@@ -128,6 +129,7 @@ function run_remote_build() {
     if [ "$rc" -ne "0" ]; then
         # If the build failed, we will not have a build_succeeded file
         # Failed rc indicates file not present
+        echo "ERROR: Kiwi build failed on remote host - no build_succeeded file found."
         touch $PARAMETER_FILE_BUILD_FAILED
     else
         # copy image files from pod to remote machine
