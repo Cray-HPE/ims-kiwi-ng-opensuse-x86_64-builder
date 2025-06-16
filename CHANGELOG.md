@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dependencies
+- CASMCMS-8022:  update python modules
+
 ## [1.9.0] - 2025-06-09
 ### Fixed
 - CASMCMS-8923: Better cleanup of remote resources on irregular exit
@@ -49,9 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | `python-dateutil`        | 2.8.1    | 2.8.2    |
 | `s3transfer`             | 0.3.0    | 0.3.7    |
 | `urllib3`                | 1.25.8   | 1.25.11  |
-
-### Dependencies
-- CASMCMS-8022:  update python modules
 
 ## [1.5.6] - 2023-07-11
 ### Changed
