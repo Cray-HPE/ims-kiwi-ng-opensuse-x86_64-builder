@@ -102,6 +102,13 @@ function run_remote_build() {
     # Modify the dockerfile to use the correct base image
     (echo "cat <<EOF" ; cat Dockerfile.remote ; echo EOF ) | sh > Dockerfile
 
+    # The dockerfile expects a dir at `/etc/cray/signing-keys` which should be a mounted secret
+    # If the dir does not exist, create it
+    if [ ! -d /etc/cray/signing-keys ]; then
+        echo "Creating /etc/cray/signing-keys directory"
+        mkdir -p /etc/cray/signing-keys
+    fi
+
     # build the docker image
     podman build --platform ${PODMAN_ARCH} -t ims-remote-${IMS_JOB_ID}:1.0.0 .
 
@@ -172,6 +179,32 @@ function run_local_build() {
     # Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
     # causes kiwi to install the cray-ca-cert rpm into the image root.
     echo "Calling kiwi-ng build..."
+
+    # Copy all the DST signing keys into the signing-keys directory
+    if [ -d /etc/cray/signing-keys ]; then
+        for file in /etc/cray/signing-keys/*; do
+            if [[ -f $file ]]; then
+                cp $file /signing-keys/
+            fi
+        done
+    fi
+
+    # set up the signing keys args
+    SIGNING_KEYS_ARGS=""
+    for file in /signing-keys/*; do
+        if [[ -f $file ]]; then
+            new_len=$((${#SIGNING_KEYS_ARGS} + ${#file} + 14)) # 14 = length of "--signing-key "
+            if [ $new_len -lt 4096 ]; then
+                # If the length of the args is less than 4096, add the signing key
+                # to the args list. If it is longer, skip it.
+                # This is a workaround for the kiwi-ng command line length limit.
+                SIGNING_KEYS_ARGS+="--signing-key $file "
+            else
+                echo "WARNING: Skipping signing key $file due to command line length limit."
+            fi
+        fi
+    done
+
     kiwi-ng \
         $DEBUG_FLAGS \
         --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
@@ -179,9 +212,7 @@ function run_local_build() {
         --description $RECIPE_ROOT_PARENT \
         --target $IMAGE_ROOT_PARENT \
         --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.noarch.rpm \
-        --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
-        --signing-key /signing-keys/HPE-SHASTA-RPM-PROD-FIPS.public \
-        --signing-key /signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc
+        $SIGNING_KEYS_ARGS
     rc=$?
 
     if [ "$rc" -ne "0" ]; then

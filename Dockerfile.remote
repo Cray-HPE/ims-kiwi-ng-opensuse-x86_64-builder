@@ -40,4 +40,7 @@ ENV RECIPE_ROOT_PARENT=/data/recipe
 # Copy in the recipe
 COPY /mnt/image/recipe/. /data/recipe
 
+# Copy DST signing keys
+COPY /etc/cray/signing-keys/. /signing-keys
+
 ENTRYPOINT ["/scripts/remote_build_entrypoint.sh"]

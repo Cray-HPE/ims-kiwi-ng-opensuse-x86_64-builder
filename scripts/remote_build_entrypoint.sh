@@ -68,6 +68,22 @@ if [[ `echo $ENABLE_DEBUG | tr [:upper:] [:lower:]` = "true" ]]; then
     DEBUG_FLAGS="--debug"
 fi
 
+# set up the signing keys args
+SIGNING_KEYS_ARGS=""
+for file in /signing-keys/*; do
+    if [[ -f $file ]]; then
+        new_len=$((${#SIGNING_KEYS_ARGS} + ${#file} + 14)) # 14 = length of "--signing-key "
+        if [ $new_len -lt 4096 ]; then
+            # If the length of the args is less than 4096, add the signing key
+            # to the args list. If it is longer, skip it.
+            # This is a workaround for the kiwi-ng command line length limit.
+            SIGNING_KEYS_ARGS+="--signing-key $file "
+        else
+            echo "WARNING: Skipping signing key $file due to command line length limit."
+        fi
+    fi
+done
+
 # Call kiwi to build the image recipe. Note that the command line --add-bootstrap-package
 # causes kiwi to install the cray-ca-cert rpm into the image root.
 echo "Calling kiwi-ng build..."
@@ -79,9 +95,7 @@ kiwi-ng \
     --description $RECIPE_ROOT_PARENT \
     --target $IMAGE_ROOT_PARENT \
     --add-bootstrap-package file:///data/ca-rpm/cray_ca_cert-1.0.1-1.noarch.rpm \
-    --signing-key /signing-keys/HPE-SHASTA-RPM-PROD.asc \
-    --signing-key /signing-keys/HPE-SHASTA-RPM-PROD-FIPS.public \
-    --signing-key /signing-keys/SUSE-gpg-pubkey-39db7c82-5f68629b.asc
+    $SIGNING_KEYS_ARGS
 rc=$?
 
 # handle if the kiwi build fails
