@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2025-06-25
 ### Dependencies
 - CASMCMS-8022:  update python modules
 - Bumped dependency patch versions:
