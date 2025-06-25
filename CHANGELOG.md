@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2025-06-25
+### Dependencies
+- CASMCMS-8022:  update python modules
+- Bumped dependency patch versions:
+| Package                | From      | To        |
+|------------------------|-----------|-----------|
+| `boto3`                | 1.12.49   | 1.36.2    |
+| `botocore`             | 1.15.49   | 1.36.26   |
+| `certifi`              | 2023.7.22 | 2025.6.15 |
+| `chardet`              | 3.0.4     | 5.2.0     |
+| `docutils`             | 0.14      | 0.21      |
+| `idna`                 | 2.8       | 3.10.0    |
+| `jmespath`             | 0.9.5     | 1.0.1     |
+| `oauthlib`             | 2.1.0     | 3.2.2     |
+| `requests`             | 2.23.1    | 2.32.4    |
+| `requests-oauthlib`    | 1.0.0     | 2.0.0     |
+| `s3transfer`           | 0.3.7     | 0.11.3    |
+| `urllib3`              | 1.25.11   | 2.4.0     |
+
+
 ## [1.9.0] - 2025-06-09
 ### Fixed
 - CASMCMS-8923: Better cleanup of remote resources on irregular exit
