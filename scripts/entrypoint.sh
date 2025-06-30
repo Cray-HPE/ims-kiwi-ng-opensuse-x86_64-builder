@@ -71,9 +71,16 @@ function run_emulation_build() {
     # run the arm64 kiwi build inside this new pod
     podman --storage-driver=vfs pull --platform linux/arm64 docker://registry.local/$IMS_ARM_BUILDER
 
+    # The dockerfile expects a dir at `/etc/cray/signing-keys` which should be a mounted secret
+    # If the dir does not exist, create it
+    if [ ! -d /etc/cray/signing-keys ]; then
+        echo "Creating /etc/cray/signing-keys directory"
+        mkdir -p /etc/cray/signing-keys
+    fi
+
     # NOTE: if we can get --cpu-rt-runtime=950000 to work in the below command, it will 
     #  allow the process to use up much more of the CPU. Currently get 'cpu feature not supported' error.
-    podman --storage-driver=vfs run  --privileged --platform linux/arm64 --entrypoint "/scripts/armentry.sh" -e BUILD_ARCH=$BUILD_ARCH -v /signing-keys:/signing-keys -v /mnt/image/recipe/:/mnt/image/recipe -v /mnt/image:/mnt/image -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm  docker://registry.local/$IMS_ARM_BUILDER
+    podman --storage-driver=vfs run  --privileged --platform linux/arm64 --entrypoint "/scripts/armentry.sh" -e BUILD_ARCH=$BUILD_ARCH -v /signing-keys:/signing-keys -v /mnt/image/recipe/:/mnt/image/recipe -v /mnt/image:/mnt/image -v /etc/cray/signing-keys/:/etc/cray/signing-keys -v /etc/cray/ca/:/etc/cray/ca/ -v /mnt/ca-rpm/:/mnt/ca-rpm docker://registry.local/$IMS_ARM_BUILDER
 }
 
 function run_remote_build() {
