@@ -39,7 +39,7 @@ SSH_SERVER_ALIVE_COUNT=30
 
 function run_emulation_build() {
     echo "Build architecture is $BUILD_ARCH - running under emulation"
-    # Regiser qemu-aarch64-static to act as an arm interpreter for arm builds 
+    # Register qemu-aarch64-static to act as an arm interpreter for arm builds 
     if [ ! -d /proc/sys/fs/binfmt_misc ] ; then
         echo "- binfmt_misc does not appear to be loaded or isn't built in."
         echo "  Trying to load it..."
@@ -98,12 +98,13 @@ function run_remote_build() {
     chmod 600 ~/.ssh/id_ecdsa
     ssh-keygen -y -f ~/.ssh/id_ecdsa > ~/.ssh/id_ecdsa.pub
 
-    # NOTE - presence of the dir in /tmp on the remote node it used to signal a running job
+    # NOTE - presence of the dir in /tmp on the remote node is used to signal a running job
     #   make sure this gets cleaned up on exit
-    ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "mkdir -p /tmp/ims_${IMS_JOB_ID}/"
+    SSH_ARGS="-o StrictHostKeyChecking=no -o ServerAliveInterval=${SSH_SERVER_ALIVE_INTERVAL_SECONDS} -o ServerAliveCountMax=${SSH_SERVER_ALIVE_COUNT} -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT_SECONDS} root@${REMOTE_BUILD_NODE}"
+    ssh ${SSH_ARGS} "mkdir -p /tmp/ims_${IMS_JOB_ID}/image/"
     if [ $? -ne 0 ]; then
         echo "ERROR: Failed to create directory /tmp/ims_${IMS_JOB_ID} on remote node $REMOTE_BUILD_NODE."
-        touch $PARAMETER_FILE_BUILD_FAILED
+        touch "$PARAMETER_FILE_BUILD_FAILED"
         exit 0
     fi
     # Modify the dockerfile to use the correct base image
@@ -123,61 +124,47 @@ function run_remote_build() {
     podman save ims-remote-${IMS_JOB_ID}:1.0.0 | ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} podman load
     if [ $? -ne 0 ]; then
         echo "ERROR: Failed to copy docker image to remote node $REMOTE_BUILD_NODE."
-        touch $PARAMETER_FILE_BUILD_FAILED
+        touch "$PARAMETER_FILE_BUILD_FAILED"
         exit 0
     fi
 
     # remote run of the docker image
     ## NOTE: do not use '-rm' tag as we want access to the results
-    ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman run --name ims-${IMS_JOB_ID} --privileged -t -i ims-remote-${IMS_JOB_ID}:1.0.0"
+    ssh ${SSH_ARGS} "podman run --name ims-${IMS_JOB_ID} --privileged -t -i -v /tmp/ims_${IMS_JOB_ID}/image:/mnt/image ims-remote-${IMS_JOB_ID}:1.0.0"
     brc=$?
-    if [ "$brc" -eq "255" ]; then
+    if [[ $brc -eq 255 ]]; then
         echo "ERROR: ssh connection failed to remote host."
-    elif [ "$brc" -ne "0" ]; then
+    elif [[ $brc -ne 0 ]]; then
         echo "ERROR: Kiwi build failed on remote host with return code: $brc"
     fi
 
     # check the results of the build
-    ssh -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o StrictHostKeyChecking=no -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/build_succeeded /tmp/ims_${IMS_JOB_ID}/"
+    ssh ${SSH_ARGS} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/build_succeeded /tmp/ims_${IMS_JOB_ID}/"
     rc=$?
-    if [ "$rc" -ne "0" ]; then
+    if [[ $rc -ne 0 ]]; then
         # If the build failed, we will not have a build_succeeded file
         # Failed rc indicates file not present
         echo "ERROR: Kiwi build failed on remote host."
-        touch $PARAMETER_FILE_BUILD_FAILED
+        touch "$PARAMETER_FILE_BUILD_FAILED"
     else
-        # copy image files from pod to remote machine
-        ## NOTE - need to copy to /tmp - VERY limited for space...
-        ## NOTE - is there a way to do this straight from remote container to this pod without the imtermediate copy??? 
-        ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/transfer.sqsh /tmp/ims_${IMS_JOB_ID}/"
-        rc_sqsh=$?
-        ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman cp ims-${IMS_JOB_ID}:${IMAGE_ROOT_PARENT}/kiwi.log /tmp/ims_${IMS_JOB_ID}/"
+        # copy image files from remote machine to job pod - be picky so we don't copy large files we don't need
+        scp -o StrictHostKeyChecking=no "root@${REMOTE_BUILD_NODE}:/tmp/ims_${IMS_JOB_ID}/image/transfer.sqsh" "${IMAGE_ROOT_PARENT}"
+        scp -o StrictHostKeyChecking=no "root@${REMOTE_BUILD_NODE}:/tmp/ims_${IMS_JOB_ID}/image/kiwi.*" "${IMAGE_ROOT_PARENT}"
+        scp -o StrictHostKeyChecking=no "root@${REMOTE_BUILD_NODE}:/tmp/ims_${IMS_JOB_ID}/image/${KERNEL_FILENAME}" "${IMAGE_ROOT_PARENT}"
+        scp -o StrictHostKeyChecking=no "root@${REMOTE_BUILD_NODE}:/tmp/ims_${IMS_JOB_ID}/image/${INITRD_FILENAME}" "${IMAGE_ROOT_PARENT}"
+        scp -o StrictHostKeyChecking=no "root@${REMOTE_BUILD_NODE}:/tmp/ims_${IMS_JOB_ID}/image/${KERNEL_PARAMETERS_FILENAME}" "${IMAGE_ROOT_PARENT}"
+        scp -o StrictHostKeyChecking=no "root@${REMOTE_BUILD_NODE}:/tmp/ims_${IMS_JOB_ID}/image/build_succeeded" "${IMAGE_ROOT_PARENT}"
 
-        if [ "$rc_sqsh" -eq "0" ]; then
-            # copy image files from remote machine to job pod
-            scp -o StrictHostKeyChecking=no root@${REMOTE_BUILD_NODE}:/tmp/ims_${IMS_JOB_ID}/* ${IMAGE_ROOT_PARENT}
-
-            # delete build files from remote host
-            ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "rm -rf /tmp/ims_${IMS_JOB_ID}/"
-
-            # unpack squashfs
-            mkdir -p ${IMAGE_ROOT_PARENT}/build
-            unsquashfs -f -d ${IMAGE_ROOT_PARENT}/build/image-root ${IMAGE_ROOT_PARENT}/transfer.sqsh
-            rm ${IMAGE_ROOT_PARENT}/transfer.sqsh
-        else
-            echo "ERROR: Failed to copy image files from pod to remote host."
-            touch $PARAMETER_FILE_BUILD_FAILED
-        fi
     fi
 
     # delete artifacts off of remote host
     # NOTE: need to prune the anonymous volume explicitly to free up the space
     # rc=255 Connection failed, authentication failure, host unreachable, or timeout. In that case we should not perform any remote cleanup as ssh connection is not possible
-    if [ "$rc" -ne "255" ]; then
-      ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "rm -rf /tmp/ims_${IMS_JOB_ID}/"
-      ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman rm ims-${IMS_JOB_ID}"
-      ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman rmi ims-remote-${IMS_JOB_ID}:1.0.0"
-      ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=$SSH_SERVER_ALIVE_INTERVAL_SECONDS -o ServerAliveCountMax=$SSH_SERVER_ALIVE_COUNT -o ConnectTimeout=$SSH_CONNECTION_TIMEOUT_SECONDS root@${REMOTE_BUILD_NODE} "podman volume prune -f"
+    if [[ $rc -ne 255 ]]; then
+      ssh ${SSH_ARGS} "rm -rf /tmp/ims_${IMS_JOB_ID}/"
+      ssh ${SSH_ARGS} "podman rm ims-${IMS_JOB_ID}"
+      ssh ${SSH_ARGS} "podman rmi ims-remote-${IMS_JOB_ID}:1.0.0"
+      ssh ${SSH_ARGS} "podman volume prune -f"
       echo "Cleanup complete on remote host"
     fi
 }
@@ -188,10 +175,10 @@ function run_local_build() {
     echo "Calling kiwi-ng build..."
 
     # Copy all the DST signing keys into the signing-keys directory
-    if [ -d /etc/cray/signing-keys ]; then
+    if [[ -d /etc/cray/signing-keys ]]; then
         for file in /etc/cray/signing-keys/*; do
             if [[ -f $file ]]; then
-                cp $file /signing-keys/
+                cp "$file" /signing-keys/
             fi
         done
     fi
@@ -201,7 +188,7 @@ function run_local_build() {
     for file in /signing-keys/*; do
         if [[ -f $file ]]; then
             new_len=$((${#SIGNING_KEYS_ARGS} + ${#file} + 14)) # 14 = length of "--signing-key "
-            if [ $new_len -lt 4096 ]; then
+            if [[ $new_len -lt 4096 ]]; then
                 # If the length of the args is less than 4096, add the signing key
                 # to the args list. If it is longer, skip it.
                 # This is a workaround for the kiwi-ng command line length limit.
@@ -214,22 +201,22 @@ function run_local_build() {
 
     kiwi-ng \
         $DEBUG_FLAGS \
-        --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
+        --logfile="$PARAMETER_FILE_KIWI_LOGFILE" \
         --type tbz system build \
-        --description $RECIPE_ROOT_PARENT \
-        --target $IMAGE_ROOT_PARENT \
+        --description "$RECIPE_ROOT_PARENT" \
+        --target "$IMAGE_ROOT_PARENT" \
         --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.noarch.rpm \
         $SIGNING_KEYS_ARGS
-    rc=$?
+    RC=$?
 
-    if [ "$rc" -ne "0" ]; then
+    if [[ $RC -ne 0 ]]; then
         echo "ERROR: Kiwi reported a build error."
-        touch $PARAMETER_FILE_BUILD_FAILED
+        touch "$PARAMETER_FILE_BUILD_FAILED"
     fi
 }
 
 # Make Cray's CA certificate a trusted system certificate within the container
-# This will not install the CA certificate into the kiwi imageroot.
+# This will not install the CA certificate into the kiwi image root.
 CA_CERT='/etc/cray/ca/certificate_authority.crt'
 if [[ -e $CA_CERT ]]; then
 	cp $CA_CERT  /usr/share/pki/trust/anchors/.
@@ -239,7 +226,7 @@ else
 fi
 update-ca-certificates
 RC=$?
-if [[ ! $RC ]]; then
+if [[ $RC -ne 0 ]]; then
 	echo "update-ca-certificates exited with return code: $RC "
 	exit 1
 fi
