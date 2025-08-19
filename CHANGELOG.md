@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dependencies
+- CASMCMS-9510: Updated ims-python-helper version to 3.3.x
+
 ## [1.11.1] - 2025-06-30
 ### Changed
 - CASMCMS-9473 - include DST signing in kiwi-ng build arguments in emulation builds.
