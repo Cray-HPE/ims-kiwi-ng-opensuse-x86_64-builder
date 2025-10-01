@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2023-2024 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2023-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -42,9 +42,9 @@ RECIPE_ROOT_PARENT=${1:-$RECIPE_ROOT_PARENT}
 IMAGE_ROOT_PARENT=${2:-$IMAGE_ROOT_PARENT}
 
 # set up file locations
-PARAMETER_FILE_BUILD_FAILED=$IMAGE_ROOT_PARENT/build_failed
-PARAMETER_FILE_BUILD_SUCCEEDED=$IMAGE_ROOT_PARENT/build_succeeded
-PARAMETER_FILE_KIWI_LOGFILE=$IMAGE_ROOT_PARENT/kiwi.log
+PARAMETER_FILE_BUILD_FAILED="$IMAGE_ROOT_PARENT/build_failed"
+PARAMETER_FILE_BUILD_SUCCEEDED="$IMAGE_ROOT_PARENT/build_succeeded"
+PARAMETER_FILE_KIWI_LOGFILE="$IMAGE_ROOT_PARENT/kiwi.log"
 IMAGE_ROOT_DIR=${IMAGE_ROOT_DIR:-${IMAGE_ROOT_PARENT}/build/image-root/}
 
 # Make Cray's CA certificate a trusted system certificate within the container
@@ -58,7 +58,7 @@ else
 fi
 update-ca-certificates
 RC=$?
-if [[ ! $RC ]]; then
+if [[ $RC -ne 0 ]]; then
 	echo "update-ca-certificates exited with return code: $RC "
 	exit 1
 fi
@@ -89,30 +89,62 @@ done
 echo "Calling kiwi-ng build..."
 kiwi-ng \
     $DEBUG_FLAGS \
-    --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
+    --logfile="$PARAMETER_FILE_KIWI_LOGFILE" \
     --target-arch=$BUILD_ARCH \
     --type tbz system build \
-    --description $RECIPE_ROOT_PARENT \
-    --target $IMAGE_ROOT_PARENT \
+    --description "$RECIPE_ROOT_PARENT" \
+    --target "$IMAGE_ROOT_PARENT" \
     --add-bootstrap-package file:///data/ca-rpm/cray_ca_cert-1.0.1-1.noarch.rpm \
     $SIGNING_KEYS_ARGS
-rc=$?
+RC=$?
 
 # handle if the kiwi build fails
-if [ "$rc" -ne "0" ]; then
+if [[ $RC -ne 0 ]]; then
   echo "ERROR: Kiwi reported a build error."
-  touch $PARAMETER_FILE_BUILD_FAILED
+  touch "$PARAMETER_FILE_BUILD_FAILED"
   exit 0
 fi
 
-# Make the squashfs formatted archive to transfer results back to job
-time mksquashfs "$IMAGE_ROOT_DIR" "$IMAGE_ROOT_PARENT/transfer.sqsh"
-# handle if the kiwi build fails
-if [ "$rc" -ne "0" ]; then
-  echo "ERROR: Squashfs reported an error."
-  touch $PARAMETER_FILE_BUILD_FAILED
+# NOTE: do this here so the buildenv-sidecar doesn't need to unpack the squashfs file later
+echo "Copying SMS CA Public Certificate to target image root"
+mkdir -p "${IMAGE_ROOT_DIR}etc/cray"
+cp -r /etc/cray/ca "${IMAGE_ROOT_DIR}etc/cray/"
+RC=$?
+if [[ $RC -ne 0 ]]; then
+  echo "Creating SMS CA Public Key directory exited with return code: $RC "
+  touch "$PARAMETER_FILE_BUILD_FAILED"
+  exit 0
+fi
+
+# copy the boot files to the image root
+if [[ -d ${IMAGE_ROOT_DIR}boot ]]; then
+  echo "Copying boot files to image root"
+  if [[ -f ${IMAGE_ROOT_DIR}boot/${KERNEL_FILENAME} ]]; then
+    echo "Copying kernel file: ${KERNEL_FILENAME} to image root"
+    cp "${IMAGE_ROOT_DIR}boot/${KERNEL_FILENAME}" "${IMAGE_ROOT_PARENT}"
+  fi
+  if [[ -f ${IMAGE_ROOT_DIR}boot/${INITRD_FILENAME} ]]; then
+    echo "Copying initrd file: ${INITRD_FILENAME} to image root"
+    cp "${IMAGE_ROOT_DIR}boot/${INITRD_FILENAME}" "${IMAGE_ROOT_PARENT}"
+  fi
+  if [[ -f ${IMAGE_ROOT_DIR}boot/${KERNEL_PARAMETERS_FILENAME} ]]; then
+    echo "Copying initrd file: ${KERNEL_PARAMETERS_FILENAME} to image root"
+    cp "${IMAGE_ROOT_DIR}boot/${KERNEL_PARAMETERS_FILENAME}" "${IMAGE_ROOT_PARENT}"
+  fi
 else
-  touch $PARAMETER_FILE_BUILD_SUCCEEDED
+  echo "No boot directory found in image root, skipping copy of boot files"
+fi
+
+
+# Make the squashfs formatted archive to transfer results back to job
+time mksquashfs "${IMAGE_ROOT_DIR}" "${IMAGE_ROOT_PARENT}/transfer.sqsh"
+RC=$?
+# handle if the kiwi build fails
+if [[ $RC -ne 0 ]]; then
+  echo "ERROR: Squashfs reported an error."
+  touch "$PARAMETER_FILE_BUILD_FAILED"
+else
+  touch "$PARAMETER_FILE_BUILD_SUCCEEDED"
 fi
 
 exit 0

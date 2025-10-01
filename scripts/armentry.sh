@@ -44,16 +44,16 @@ else
 fi
 update-ca-certificates
 RC=$?
-if [[ ! $RC ]]; then
+if [[ $RC -ne 0 ]]; then
 	echo "update-ca-certificates exited with return code: $RC "
 	exit 1
 fi
 
 # Copy all the DST signing keys into the signing-keys directory
-if [ -d /etc/cray/signing-keys ]; then
+if [[ -d /etc/cray/signing-keys ]]; then
     for file in /etc/cray/signing-keys/*; do
         if [[ -f $file ]]; then
-            cp $file /signing-keys/
+            cp "$file" /signing-keys/
         fi
     done
 fi
@@ -63,7 +63,7 @@ SIGNING_KEYS_ARGS=""
 for file in /signing-keys/*; do
     if [[ -f $file ]]; then
         new_len=$((${#SIGNING_KEYS_ARGS} + ${#file} + 14)) # 14 = length of "--signing-key "
-        if [ $new_len -lt 4096 ]; then
+        if [[ $new_len -lt 4096 ]]; then
             # If the length of the args is less than 4096, add the signing key
             # to the args list. If it is longer, skip it.
             # This is a workaround for the kiwi-ng command line length limit.
@@ -79,19 +79,19 @@ done
 kiwi-ng \
     $DEBUG_FLAGS \
     --target-arch=$BUILD_ARCH \
-    --logfile=$PARAMETER_FILE_KIWI_LOGFILE \
+    --logfile="$PARAMETER_FILE_KIWI_LOGFILE" \
     --type tbz system build \
-    --description $RECIPE_ROOT_PARENT \
-    --target $IMAGE_ROOT_PARENT \
+    --description "$RECIPE_ROOT_PARENT" \
+    --target "$IMAGE_ROOT_PARENT" \
     --add-bootstrap-package file:///mnt/ca-rpm/cray_ca_cert-1.0.1-1.noarch.rpm \
     $SIGNING_KEYS_ARGS
-rc=$?
+RC=$?
 
-if [ "$rc" -ne "0" ]; then
+if [[ $RC -ne 0 ]]; then
   echo "ERROR: Kiwi reported a build error."
   echo "Outputting kiwi log file."
-  cat $PARAMETER_FILE_KIWI_LOGFILE
-  touch $PARAMETER_FILE_BUILD_FAILED
+  cat "$PARAMETER_FILE_KIWI_LOGFILE"
+  touch "$PARAMETER_FILE_BUILD_FAILED"
 fi
 
 # Always return 0
