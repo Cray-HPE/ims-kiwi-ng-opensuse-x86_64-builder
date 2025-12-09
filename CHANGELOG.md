@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.14.0] - 2025-12-09
 ### Fixed
 - CASMCMS-9613 - fix Docker image build to not pull in new version of python on rebuilds.
 
