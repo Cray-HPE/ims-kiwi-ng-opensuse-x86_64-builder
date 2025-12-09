@@ -22,7 +22,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 # Cray Image Management Service image build environment Dockerfile
-FROM artifactory.algol60.net/csm-docker/stable/docker.io/opensuse/leap:15.6 as base
+FROM artifactory.algol60.net/csm-docker/stable/docker.io/opensuse/leap:15.6 AS base
 
 COPY requirements.txt constraints.txt zypper-refresh-patch-clean.sh /
 # 1. Install qemu-aarch64-static binary to handle arm64 emulation if needed
@@ -34,12 +34,6 @@ RUN --mount=type=secret,id=netrc,target=/root/.netrc \
     wget https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-aarch64-static && \
     mv ./qemu-aarch64-static /usr/bin/qemu-aarch64-static && \
     chmod +x /usr/bin/qemu-aarch64-static && \
-    zypper --non-interactive ar http://download.opensuse.org/tumbleweed/repo/oss/ tumbleweed && \
-    zypper --non-interactive refresh && \
-    zypper --non-interactive in -y 'xalan-j2>=2.7.3' && \
-    zypper --non-interactive rr tumbleweed && \
-    /zypper-refresh-patch-clean.sh && \
-    rm /zypper-refresh-patch-clean.sh && \
     pip3 install --upgrade pip && \
     pip3 install --no-cache-dir -r requirements.txt && \
     pip3 list --format freeze
